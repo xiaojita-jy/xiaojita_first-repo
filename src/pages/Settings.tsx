@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCategories } from '../hooks/useCategories';
-
-// Stub until Task 18 creates utils/backup.ts
-async function exportBackup() {
-  // will be replaced in Task 18
-  alert('备份功能将在下一步实现');
-}
-async function importBackup() {
-  // will be replaced in Task 18
-  alert('恢复功能将在下一步实现');
-}
+import { exportBackup, importBackup } from '../utils/backup';
 
 export default function Settings() {
   const navigate = useNavigate();
