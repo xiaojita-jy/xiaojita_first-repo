@@ -10,11 +10,14 @@ class KeepAccountsDB extends Dexie {
 
   constructor() {
     super('KeepAccountsDB');
-    this.version(1).stores({
+    this.version(2).stores({
       transactions: 'id, date, categoryId, type, amount',
-      categories: 'id, type, parentId',
+      categories: 'id, type, parentId, order',
       budgets: 'id, [month+categoryId]',
       settings: 'key',
+    }).upgrade(async tx => {
+      // v1→v2: 新增 order 索引，清空旧分类数据后重新播种
+      await tx.table('categories').clear();
     });
   }
 }
