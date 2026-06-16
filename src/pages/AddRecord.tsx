@@ -10,7 +10,7 @@ import type { PaymentMethod } from '../models';
 
 export default function AddRecord() {
   const navigate = useNavigate();
-  const { expenseCategories, incomeCategories, getSubs } = useCategories();
+  const { expenseCategories, incomeCategories, loading: catLoading, error: catError, getSubs } = useCategories();
   const { add } = useTransactions();
 
   const [type, setType] = useState<'expense' | 'income'>('expense');
@@ -92,15 +92,21 @@ export default function AddRecord() {
       <AmountInput value={amountStr} onChange={setAmountStr} />
 
       <div className="space-y-5 mt-6">
-        <CategoryPicker
-          type={type}
-          categories={categories}
-          subCategories={subCategories}
-          selectedCategoryId={categoryId}
-          selectedSubCategoryId={subCategoryId}
-          onCategoryChange={id => { setCategoryId(id); setSubCategoryId(undefined); }}
-          onSubCategoryChange={setSubCategoryId}
-        />
+        {catLoading ? (
+          <p className="text-sm text-gray-400 text-center py-4">加载分类中...</p>
+        ) : catError ? (
+          <p className="text-sm text-red-500 text-center py-4">分类加载失败：{catError}</p>
+        ) : (
+          <CategoryPicker
+            type={type}
+            categories={categories}
+            subCategories={subCategories}
+            selectedCategoryId={categoryId}
+            selectedSubCategoryId={subCategoryId}
+            onCategoryChange={id => { setCategoryId(id); setSubCategoryId(undefined); }}
+            onSubCategoryChange={setSubCategoryId}
+          />
+        )}
 
         <div>
           <label className="block text-sm text-gray-500 mb-2">日期</label>

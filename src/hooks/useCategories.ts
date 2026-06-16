@@ -6,13 +6,21 @@ import type { Category } from '../models';
 export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    await DexieAdapter.seedDefaultCategories(ALL_DEFAULT_CATEGORIES);
-    const all = await DexieAdapter.getAllCategories();
-    setCategories(all);
-    setLoading(false);
+    setError(null);
+    try {
+      await DexieAdapter.seedDefaultCategories(ALL_DEFAULT_CATEGORIES);
+      const all = await DexieAdapter.getAllCategories();
+      setCategories(all);
+    } catch (e: any) {
+      console.error('useCategories load failed:', e);
+      setError(e.message || '加载分类失败');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -48,7 +56,7 @@ export function useCategories() {
   }, [load]);
 
   return {
-    categories, loading,
+    categories, loading, error,
     expenseCategories, incomeCategories,
     getSubs, getById,
     addCategory, updateCategory, deleteCategory,
