@@ -47,36 +47,40 @@ export interface Budget {
 let _catId = 0;
 const cid = () => `cat_${++_catId}`;
 
+// 一级分类先创建为命名变量，供二级分类引用 parentId
+const catFood: Category = { id: cid(), name: '餐饮', type: 'expense', icon: '🍜', order: 1 };
+const catHousing: Category = { id: cid(), name: '居住', type: 'expense', icon: '🏠', order: 2 };
+const catTransport: Category = { id: cid(), name: '交通', type: 'expense', icon: '🚗', order: 3 };
+const catShopping: Category = { id: cid(), name: '购物', type: 'expense', icon: '🛒', order: 4 };
+const catJoy: Category = { id: cid(), name: '悦己', type: 'expense', icon: '🎯', order: 5 };
+const catSocial: Category = { id: cid(), name: '人情', type: 'expense', icon: '🎁', order: 6 };
+const catHealth: Category = { id: cid(), name: '医教', type: 'expense', icon: '💊', order: 7 };
+const catOther: Category = { id: cid(), name: '其他', type: 'expense', icon: '📌', order: 8 };
+
 export const DEFAULT_EXPENSE_CATEGORIES: Category[] = [
-  { id: cid(), name: '餐饮', type: 'expense', icon: '🍜', order: 1 },
-  { id: cid(), name: '居住', type: 'expense', icon: '🏠', order: 2 },
-  { id: cid(), name: '交通', type: 'expense', icon: '🚗', order: 3 },
-  { id: cid(), name: '购物', type: 'expense', icon: '🛒', order: 4 },
-  { id: cid(), name: '悦己', type: 'expense', icon: '🎯', order: 5 },
-  { id: cid(), name: '人情', type: 'expense', icon: '🎁', order: 6 },
-  { id: cid(), name: '医教', type: 'expense', icon: '💊', order: 7 },
-  { id: cid(), name: '其他', type: 'expense', icon: '📌', order: 8 },
+  catFood, catHousing, catTransport, catShopping,
+  catJoy, catSocial, catHealth, catOther,
 ];
 
 export const DEFAULT_EXPENSE_SUB_CATEGORIES: Category[] = [
   // 餐饮 二级
-  { id: cid(), name: '外卖', type: 'expense', icon: '🥡', order: 1, parentId: DEFAULT_EXPENSE_CATEGORIES[0].id },
-  { id: cid(), name: '外食', type: 'expense', icon: '🍽️', order: 2, parentId: DEFAULT_EXPENSE_CATEGORIES[0].id },
-  { id: cid(), name: '买菜', type: 'expense', icon: '🥬', order: 3, parentId: DEFAULT_EXPENSE_CATEGORIES[0].id },
-  { id: cid(), name: '零食饮料', type: 'expense', icon: '🧋', order: 4, parentId: DEFAULT_EXPENSE_CATEGORIES[0].id },
-  { id: cid(), name: '聚餐', type: 'expense', icon: '🥘', order: 5, parentId: DEFAULT_EXPENSE_CATEGORIES[0].id },
+  { id: cid(), name: '外卖', type: 'expense', icon: '🥡', order: 1, parentId: catFood.id },
+  { id: cid(), name: '外食', type: 'expense', icon: '🍽️', order: 2, parentId: catFood.id },
+  { id: cid(), name: '买菜', type: 'expense', icon: '🥬', order: 3, parentId: catFood.id },
+  { id: cid(), name: '零食饮料', type: 'expense', icon: '🧋', order: 4, parentId: catFood.id },
+  { id: cid(), name: '聚餐', type: 'expense', icon: '🥘', order: 5, parentId: catFood.id },
   // 交通 二级
-  { id: cid(), name: '通勤', type: 'expense', icon: '🚇', order: 1, parentId: DEFAULT_EXPENSE_CATEGORIES[2].id },
-  { id: cid(), name: '打车', type: 'expense', icon: '🚕', order: 2, parentId: DEFAULT_EXPENSE_CATEGORIES[2].id },
-  { id: cid(), name: '停车', type: 'expense', icon: '🅿️', order: 3, parentId: DEFAULT_EXPENSE_CATEGORIES[2].id },
-  { id: cid(), name: '养车', type: 'expense', icon: '🔧', order: 4, parentId: DEFAULT_EXPENSE_CATEGORIES[2].id },
+  { id: cid(), name: '通勤', type: 'expense', icon: '🚇', order: 1, parentId: catTransport.id },
+  { id: cid(), name: '打车', type: 'expense', icon: '🚕', order: 2, parentId: catTransport.id },
+  { id: cid(), name: '停车', type: 'expense', icon: '🅿️', order: 3, parentId: catTransport.id },
+  { id: cid(), name: '养车', type: 'expense', icon: '🔧', order: 4, parentId: catTransport.id },
   // 购物 二级
-  { id: cid(), name: '服饰鞋包', type: 'expense', icon: '👗', order: 1, parentId: DEFAULT_EXPENSE_CATEGORIES[3].id },
-  { id: cid(), name: '数码电子', type: 'expense', icon: '📱', order: 2, parentId: DEFAULT_EXPENSE_CATEGORIES[3].id },
-  { id: cid(), name: '美妆个护', type: 'expense', icon: '💄', order: 3, parentId: DEFAULT_EXPENSE_CATEGORIES[3].id },
-  { id: cid(), name: '家居日用', type: 'expense', icon: '🏪', order: 4, parentId: DEFAULT_EXPENSE_CATEGORIES[3].id },
-  { id: cid(), name: '冲动消费⚠️', type: 'expense', icon: '⚡', order: 5, parentId: DEFAULT_EXPENSE_CATEGORIES[3].id },
-  { id: cid(), name: '其他购物', type: 'expense', icon: '📦', order: 6, parentId: DEFAULT_EXPENSE_CATEGORIES[3].id },
+  { id: cid(), name: '服饰鞋包', type: 'expense', icon: '👗', order: 1, parentId: catShopping.id },
+  { id: cid(), name: '数码电子', type: 'expense', icon: '📱', order: 2, parentId: catShopping.id },
+  { id: cid(), name: '美妆个护', type: 'expense', icon: '💄', order: 3, parentId: catShopping.id },
+  { id: cid(), name: '家居日用', type: 'expense', icon: '🏪', order: 4, parentId: catShopping.id },
+  { id: cid(), name: '冲动消费⚠️', type: 'expense', icon: '⚡', order: 5, parentId: catShopping.id },
+  { id: cid(), name: '其他购物', type: 'expense', icon: '📦', order: 6, parentId: catShopping.id },
 ];
 
 export const DEFAULT_INCOME_CATEGORIES: Category[] = [
