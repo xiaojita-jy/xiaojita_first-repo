@@ -1,7 +1,7 @@
 {
   "name": "keep_accounts",
   "version": "1.0.0",
-  "description": "",
+  "description": "个人记账 PWA 应用 — 流水账收入支出管理",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -10,7 +10,7 @@
     "test:watch": "vitest"
   },
   "keywords": [],
-  "author": "",
+  "author": "小吉他",
   "license": "ISC",
   "type": "module",
   "dependencies": {

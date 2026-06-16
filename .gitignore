@@ -1,2 +1,12 @@
 node_modules
 dist
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+.env
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+*.tsbuildinfo
