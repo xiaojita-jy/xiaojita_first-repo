@@ -65,6 +65,11 @@ export async function importBackup(): Promise<void> {
         if (!Array.isArray(data.transactions)) throw new Error('备份文件格式错误：缺少交易数据');
         if (!Array.isArray(data.categories)) throw new Error('备份文件格式错误：缺少分类数据');
 
+        // 清空现有数据再导入
+        await db.transactions.clear();
+        await db.categories.clear();
+        await db.budgets.clear();
+
         for (const cat of data.categories) {
           await DexieAdapter.addCategory(cat);
         }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
 import { useCategories } from '../hooks/useCategories';
-import { formatAmount, formatDateShort, getCurrentMonth } from '../utils/format';
+import { formatAmount, formatDateShort, getCurrentMonth, getDayOfWeek } from '../utils/format';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import type { Transaction, PaymentMethod } from '../models';
@@ -21,8 +21,10 @@ export default function Records() {
   const [filterCategory, setFilterCategory] = useState('');
   const [filterPayment, setFilterPayment] = useState<PaymentMethod | ''>('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editNote, setEditNote] = useState('');
+  const [editing, setEditing] = useState<{
+    id: string; type: 'expense' | 'income'; amount: string;
+    categoryId: string; paymentMethod: PaymentMethod; date: string; note: string;
+  } | null>(null);
 
   const { transactions, loading, remove, update } = useTransactions(month);
   const { categories, getById } = useCategories();
@@ -51,15 +53,41 @@ export default function Records() {
   };
 
   const handleEdit = (tx: Transaction) => {
-    setEditingId(tx.id);
-    setEditNote(tx.note || '');
+    setEditing({
+      id: tx.id,
+      type: tx.type,
+      amount: (tx.amount / 100).toFixed(2),
+      categoryId: tx.categoryId,
+      paymentMethod: tx.paymentMethod,
+      date: tx.date,
+      note: tx.note || '',
+    });
   };
 
-  const handleSaveEdit = async (id: string) => {
-    await update(id, { note: editNote });
-    setEditingId(null);
-    setEditNote('');
+  const handleSaveEdit = async () => {
+    if (!editing) return;
+    const amountYuan = parseFloat(editing.amount);
+    if (isNaN(amountYuan) || amountYuan <= 0) return;
+    await update(editing.id, {
+      amount: Math.round(amountYuan * 100),
+      categoryId: editing.categoryId,
+      paymentMethod: editing.paymentMethod,
+      date: editing.date,
+      note: editing.note || undefined,
+    });
+    setEditing(null);
   };
+
+  // 按日期分组
+  const grouped = (() => {
+    const map = new Map<string, Transaction[]>();
+    filtered.forEach(tx => {
+      const list = map.get(tx.date) || [];
+      list.push(tx);
+      map.set(tx.date, list);
+    });
+    return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
+  })();
 
   return (
     <div className="px-4 py-6">
@@ -112,48 +140,102 @@ export default function Records() {
       ) : filtered.length === 0 ? (
         <EmptyState icon="📋" message="本月无记录" />
       ) : (
-        <div className="space-y-2">
-          {filtered.map(tx => {
-            const cat = getById(tx.categoryId);
-            const isEditing = editingId === tx.id;
+        <div className="space-y-4">
+          {grouped.map(([date, txs]) => {
+            const dayExpense = txs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+            const dayIncome = txs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
             return (
-              <div key={tx.id} className="bg-white rounded-xl p-3 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{cat?.icon || '📌'}</span>
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">{cat?.name || '未知'}</p>
-                      {isEditing ? (
-                        <div className="flex gap-1 mt-1">
+              <div key={date}>
+                {/* 日期标题行 */}
+                <div className="flex items-center justify-between px-1 mb-2">
+                  <span className="text-sm font-medium text-gray-700">
+                    {formatDateShort(date)} {getDayOfWeek(date)}
+                  </span>
+                  <div className="flex gap-3 text-xs">
+                    {dayExpense > 0 && <span className="text-red-500">支出 {formatAmount(dayExpense)}</span>}
+                    {dayIncome > 0 && <span className="text-green-500">收入 {formatAmount(dayIncome)}</span>}
+                  </div>
+                </div>
+                {/* 当日交易列表 */}
+                <div className="space-y-1.5">
+                  {txs.map(tx => {
+                    const cat = getById(tx.categoryId);
+                    const isEditing = editing?.id === tx.id;
+                    return isEditing ? (
+                      <div key={tx.id} className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <input
+                              type="text" inputMode="decimal"
+                              value={editing.amount}
+                              onChange={e => setEditing({ ...editing, amount: e.target.value })}
+                              className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm"
+                              placeholder="金额"
+                            />
+                            <input
+                              type="date"
+                              value={editing.date}
+                              onChange={e => setEditing({ ...editing, date: e.target.value })}
+                              className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <select
+                              value={editing.categoryId}
+                              onChange={e => setEditing({ ...editing, categoryId: e.target.value })}
+                              className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm bg-white"
+                            >
+                              {categories
+                                .filter(c => c.type === editing.type)
+                                .map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}{c.parentId ? ' (子)' : ''}</option>)}
+                            </select>
+                            <select
+                              value={editing.paymentMethod}
+                              onChange={e => setEditing({ ...editing, paymentMethod: e.target.value as PaymentMethod })}
+                              className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm bg-white"
+                            >
+                              <option value="wechat">微信</option>
+                              <option value="alipay">支付宝</option>
+                              <option value="bank_card">银行卡</option>
+                              <option value="credit_card">信用卡</option>
+                              <option value="cash">现金</option>
+                              <option value="other">其他</option>
+                            </select>
+                          </div>
                           <input
                             type="text"
-                            value={editNote}
-                            onChange={e => setEditNote(e.target.value)}
-                            className="px-2 py-0.5 border border-gray-200 rounded text-xs flex-1"
-                            autoFocus
+                            value={editing.note}
+                            onChange={e => setEditing({ ...editing, note: e.target.value })}
+                            placeholder="备注"
+                            className="w-full px-2 py-1 border border-gray-200 rounded text-sm"
                           />
-                          <button onClick={() => handleSaveEdit(tx.id)} className="text-xs text-blue-500 px-1">保存</button>
-                          <button onClick={() => setEditingId(null)} className="text-xs text-gray-400 px-1">取消</button>
+                          <div className="flex gap-2 pt-1">
+                            <button onClick={handleSaveEdit} className="flex-1 py-1.5 bg-blue-500 text-white rounded text-xs font-medium">保存</button>
+                            <button onClick={() => setEditing(null)} className="flex-1 py-1.5 border border-gray-300 text-gray-600 rounded text-xs">取消</button>
+                          </div>
                         </div>
-                      ) : (
-                        <p className="text-xs text-gray-400">
-                          {formatDateShort(tx.date)}
-                          {tx.note ? ` · ${tx.note}` : ''}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm font-semibold ${tx.type === 'expense' ? 'text-red-500' : 'text-green-500'}`}>
-                      {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}
-                    </span>
-                    {!isEditing && (
-                      <div className="flex flex-col gap-1">
-                        <button onClick={() => handleEdit(tx)} className="text-xs text-gray-400">编辑</button>
-                        <button onClick={() => setDeleteId(tx.id)} className="text-xs text-gray-400">删除</button>
                       </div>
-                    )}
-                  </div>
+                    ) : (
+                      <div key={tx.id} className="bg-white rounded-lg px-3 py-2 shadow-sm flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{cat?.icon || '📌'}</span>
+                          <div>
+                            <p className="text-sm text-gray-800">{cat?.name || '未知'}</p>
+                            {tx.note && <p className="text-xs text-gray-400">{tx.note}</p>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-semibold ${tx.type === 'expense' ? 'text-red-500' : 'text-green-500'}`}>
+                            {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}
+                          </span>
+                          <div className="flex flex-col gap-0.5">
+                            <button onClick={() => handleEdit(tx)} className="text-xs text-gray-400 leading-none">编辑</button>
+                            <button onClick={() => setDeleteId(tx.id)} className="text-xs text-gray-400 leading-none">删除</button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );

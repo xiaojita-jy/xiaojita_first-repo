@@ -38,7 +38,8 @@ export default function Reports() {
   const drilldownCategory = drilldownId ? breakdown.find(b => b.categoryId === drilldownId) : null;
 
   const currentExpense = breakdown.reduce((s, b) => s + b.amount, 0);
-  const currentIncome = trendData.find(d => d.month === month.slice(5))?.收入 ?? 0;
+  const currentMonthSummary = monthlySummaries.find(s => s.month === month);
+  const currentIncome = currentMonthSummary?.income ?? 0;
 
   if (loading) {
     return <div className="px-4 py-6 text-center text-gray-400">加载中...</div>;
@@ -65,10 +66,44 @@ export default function Reports() {
           <div>
             <p className="text-xs text-gray-400">支出</p>
             <p className="text-lg font-bold text-red-500">{formatAmount(currentExpense)}</p>
+            {(() => {
+              const lastMonth = monthlySummaries.find(s => {
+                const [y, m] = month.split('-').map(Number);
+                const last = new Date(y, m - 2, 1);
+                const lm = `${last.getFullYear()}-${String(last.getMonth() + 1).padStart(2, '0')}`;
+                return s.month === lm;
+              });
+              if (!lastMonth || lastMonth.expense === 0) return null;
+              const change = Math.round(((currentExpense - lastMonth.expense) / lastMonth.expense) * 100);
+              if (change === 0) return <p className="text-xs text-gray-400 mt-0.5">环比持平</p>;
+              const isUp = change > 0;
+              return (
+                <p className={`text-xs mt-0.5 ${isUp ? 'text-red-400' : 'text-green-500'}`}>
+                  环比 {isUp ? '↑' : '↓'} {Math.abs(change)}%
+                </p>
+              );
+            })()}
           </div>
           <div>
             <p className="text-xs text-gray-400">收入</p>
-            <p className="text-lg font-bold text-green-500">{formatAmount(currentIncome * 100)}</p>
+            <p className="text-lg font-bold text-green-500">{formatAmount(currentIncome)}</p>
+            {(() => {
+              const lastMonth = monthlySummaries.find(s => {
+                const [y, m] = month.split('-').map(Number);
+                const last = new Date(y, m - 2, 1);
+                const lm = `${last.getFullYear()}-${String(last.getMonth() + 1).padStart(2, '0')}`;
+                return s.month === lm;
+              });
+              if (!lastMonth || lastMonth.income === 0) return null;
+              const change = Math.round(((currentIncome - lastMonth.income) / lastMonth.income) * 100);
+              if (change === 0) return <p className="text-xs text-gray-400 mt-0.5">环比持平</p>;
+              const isUp = change > 0;
+              return (
+                <p className={`text-xs mt-0.5 ${isUp ? 'text-green-500' : 'text-red-400'}`}>
+                  环比 {isUp ? '↑' : '↓'} {Math.abs(change)}%
+                </p>
+              );
+            })()}
           </div>
         </div>
       </div>

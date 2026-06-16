@@ -7,7 +7,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon-192.png'],
+      includeAssets: ['icon-192.png', 'icon-512.svg'],
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      },
       manifest: {
         name: '记账',
         short_name: '记账',
@@ -16,7 +19,10 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         lang: 'zh-CN',
-        icons: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }],
+        icons: [
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icon-512.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any' },
+        ],
       },
     }),
   ],

@@ -10,3 +10,5 @@ Thumbs.db
 *.log
 npm-debug.log*
 *.tsbuildinfo
+
+.vercel
