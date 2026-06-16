@@ -1,0 +1,134 @@
+import Dexie, { type Table } from 'dexie';
+import type { Transaction, Category, Budget } from '../models';
+import type { IAdapter } from './types';
+
+class KeepAccountsDB extends Dexie {
+  transactions!: Table<Transaction, string>;
+  categories!: Table<Category, string>;
+  budgets!: Table<Budget, string>;
+  settings!: Table<{ key: string; value: string }, string>;
+
+  constructor() {
+    super('KeepAccountsDB');
+    this.version(1).stores({
+      transactions: 'id, date, categoryId, type, amount',
+      categories: 'id, type, parentId',
+      budgets: 'id, [month+categoryId]',
+      settings: 'key',
+    });
+  }
+}
+
+const db = new KeepAccountsDB();
+
+export const DexieAdapter: IAdapter = {
+  // —— Transactions ——
+  async getAllTransactions() {
+    return db.transactions.orderBy('date').reverse().toArray();
+  },
+
+  async getTransactionsByMonth(month: string) {
+    return db.transactions
+      .where('date')
+      .startsWith(month)
+      .reverse()
+      .sortBy('date');
+  },
+
+  async getTransactionsByCategory(categoryId: string, month?: string) {
+    let collection = db.transactions.where('categoryId').equals(categoryId);
+    if (month) {
+      collection = collection.filter(tx => tx.date.startsWith(month));
+    }
+    return collection.reverse().sortBy('date');
+  },
+
+  async addTransaction(tx: Transaction) {
+    await db.transactions.add(tx);
+  },
+
+  async updateTransaction(id: string, data: Partial<Transaction>) {
+    await db.transactions.update(id, { ...data, updatedAt: Date.now() });
+  },
+
+  async deleteTransaction(id: string) {
+    await db.transactions.delete(id);
+  },
+
+  // —— Categories ——
+  async getAllCategories() {
+    return db.categories.orderBy('order').toArray();
+  },
+
+  async getCategoriesByType(type: 'expense' | 'income') {
+    return db.categories.where('type').equals(type).sortBy('order');
+  },
+
+  async getSubCategories(parentId: string) {
+    return db.categories.where('parentId').equals(parentId).sortBy('order');
+  },
+
+  async addCategory(cat: Category) {
+    await db.categories.add(cat);
+  },
+
+  async updateCategory(id: string, data: Partial<Category>) {
+    await db.categories.update(id, data);
+  },
+
+  async deleteCategory(id: string) {
+    await db.categories.delete(id);
+  },
+
+  async getTransactionCountByCategory(categoryId: string) {
+    return db.transactions.where('categoryId').equals(categoryId).count();
+  },
+
+  // —— Budgets ——
+  async getBudget(month: string, categoryId?: string) {
+    const keyCategoryId = categoryId ?? '__total__';
+    return db.budgets.where({ month, categoryId: keyCategoryId }).first();
+  },
+
+  async getAllBudgets(month: string) {
+    return db.budgets.where('month').equals(month).toArray();
+  },
+
+  async setBudget(budget: Budget) {
+    const keyCategoryId = budget.categoryId ?? '__total__';
+    const existing = await db.budgets
+      .where('[month+categoryId]')
+      .equals([budget.month, keyCategoryId])
+      .first();
+    if (existing) {
+      await db.budgets.update(existing.id, { amount: budget.amount });
+    } else {
+      await db.budgets.add({ ...budget, categoryId: keyCategoryId });
+    }
+  },
+
+  async deleteBudget(id: string) {
+    await db.budgets.delete(id);
+  },
+
+  // —— Settings ——
+  async getSetting(key: string) {
+    const row = await db.settings.get(key);
+    return row?.value ?? null;
+  },
+
+  async setSetting(key: string, value: string) {
+    await db.settings.put({ key, value });
+  },
+
+  // —— Lifecycle ——
+  async seedDefaultCategories(categories: Category[]) {
+    const count = await db.categories.count();
+    if (count === 0) {
+      await db.categories.bulkAdd(categories);
+    }
+  },
+};
+
+// 导出 db 实例供备份模块使用
+export { db };
