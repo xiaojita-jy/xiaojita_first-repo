@@ -1,0 +1,87 @@
+/**
+ * 分 → 元（数字）
+ */
+export function centsToYuan(cents: number): number {
+  return cents / 100;
+}
+
+/**
+ * 分 → 显示字符串（¥1,234.56）
+ */
+export function formatAmount(cents: number): string {
+  const yuan = cents / 100;
+  if (yuan < 0) {
+    return `-¥${Math.abs(yuan).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+  return `¥${yuan.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+/**
+ * 元 → 分（整数）
+ */
+export function yuanToCents(yuan: number): number {
+  return Math.round(yuan * 100);
+}
+
+/**
+ * 解析用户输入的金额字符串 → 分
+ * 支持: "35", "35.5", "35.50"
+ */
+export function parseAmountToCents(input: string): number {
+  const cleaned = input.replace(/[^0-9.]/g, '');
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return 0;
+  return Math.round(num * 100);
+}
+
+/**
+ * 获取当前月份字符串 YYYY-MM
+ */
+export function getCurrentMonth(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+/**
+ * 获取今天的日期字符串 YYYY-MM-DD
+ */
+export function getToday(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+/**
+ * 生成 UUID v4
+ */
+export function generateId(): string {
+  return crypto.randomUUID();
+}
+
+/**
+ * 格式化日期显示：2024-06-16 → 6月16日
+ */
+export function formatDateShort(dateStr: string): string {
+  const [, month, day] = dateStr.split('-');
+  return `${parseInt(month)}月${parseInt(day)}日`;
+}
+
+/**
+ * 月份显示：2024-06 → 2024年6月
+ */
+export function formatMonth(dateStr: string): string {
+  const [year, month] = dateStr.split('-');
+  return `${year}年${parseInt(month)}月`;
+}
+
+/**
+ * 获取过去 N 个月的月份列表
+ */
+export function getPastMonths(n: number): string[] {
+  const months: string[] = [];
+  const now = new Date();
+  for (let i = 0; i < n; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  }
+  return months;
+}
