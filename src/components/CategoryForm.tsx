@@ -2,16 +2,40 @@ import { useState } from 'react';
 import type { Category } from '../models';
 
 const EMOJI_LIST = [
-  '🍜', '🏠', '🚗', '🛒', '🎯', '🎁', '💊', '📌',
-  '💰', '💼', '📥', '🎮', '✈️', '🐱', '🎓', '🎵',
-  '🏋️', '📚', '☕', '🎬',
+  // 餐饮 (8)
+  '🍜', '🍳', '🥩', '🍕', '🥤', '🍰', '🍲', '🍞',
+  // 居住 + 家庭 (4)
+  '🏠', '🛏️', '🧹', '🧺',
+  // 交通 (6)
+  '🚗', '🚌', '🚲', '🚄', '✈️', '🛵',
+  // 购物 (6)
+  '🛒', '👟', '🎒', '🛍️', '💻', '⌚',
+  // 悦己 + 娱乐 (6)
+  '🎯', '🎮', '🎸', '🎨', '🎲', '🎵',
+  // 人情 + 庆祝 (4)
+  '🎁', '🎂', '🎉', '🎊',
+  // 医教 (5)
+  '💊', '📖', '✏️', '🏥', '💉',
+  // 收入 (4)
+  '💰', '💼', '📥', '🏦',
+  // 其他生活 (7)
+  '📌', '🐱', '🐶', '🐰', '⚽', '🏀', '🏋️',
+  // 其他 (4)
+  '📚', '☕', '🎬', '💳',
+];
+
+const COLOR_PALETTE = [
+  '#EF4444', '#F97316', '#F59E0B', '#EAB308',
+  '#84CC16', '#22C55E', '#10B981', '#14B8A6',
+  '#06B6D4', '#3B82F6', '#6366F1', '#8B5CF6',
+  '#EC4899', '#6B7280',
 ];
 
 interface Props {
   category?: Category;
   type?: 'expense' | 'income';
   hideType?: boolean;
-  onSave: (data: { name: string; icon: string; type: 'expense' | 'income' }) => Promise<void>;
+  onSave: (data: { name: string; icon: string; type: 'expense' | 'income'; color?: string }) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -19,6 +43,8 @@ export default function CategoryForm({ category, type: initialType, hideType, on
   const isEdit = !!category;
   const [name, setName] = useState(category?.name ?? '');
   const [icon, setIcon] = useState(category?.icon ?? EMOJI_LIST[0]);
+  const [color, setColor] = useState<string | undefined>(category?.color);
+  const [emojiInput, setEmojiInput] = useState('');
   const [type, setType] = useState<'expense' | 'income'>(category?.type ?? initialType ?? 'expense');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -35,11 +61,21 @@ export default function CategoryForm({ category, type: initialType, hideType, on
     }
     setSaving(true);
     try {
-      await onSave({ name: name.trim(), icon, type });
+      await onSave({ name: name.trim(), icon, type, color });
     } catch (e: any) {
       setError(e.message || '保存失败');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // 从 emoji 输入框提取 emoji
+  const handleEmojiInput = (value: string) => {
+    setEmojiInput(value);
+    // 尝试从输入内容中提取一个 emoji 作为图标
+    const emojiMatch = value.match(/[\p{Emoji_Presentation}\p{Emoji}‍]/gu);
+    if (emojiMatch) {
+      setIcon(emojiMatch[0]);
     }
   };
 
@@ -66,14 +102,15 @@ export default function CategoryForm({ category, type: initialType, hideType, on
         </div>
       )}
 
+      {/* 图标选择器：6列网格，54个 emoji */}
       <label className="block text-sm text-gray-400 mb-2">图标</label>
-      <div className="grid grid-cols-5 gap-2 mb-4">
+      <div className="grid grid-cols-6 gap-2 mb-3">
         {EMOJI_LIST.map(emoji => (
           <button
             key={emoji}
             type="button"
-            onClick={() => setIcon(emoji)}
-            className={`text-2xl py-2 rounded-lg border transition-colors ${
+            onClick={() => { setIcon(emoji); setEmojiInput(''); }}
+            className={`text-xl py-1.5 rounded-lg border transition-colors ${
               icon === emoji
                 ? 'bg-blue-50 border-blue-400'
                 : 'bg-[#faf9f7] border-border'
@@ -84,6 +121,34 @@ export default function CategoryForm({ category, type: initialType, hideType, on
         ))}
       </div>
 
+      {/* 手动输入 emoji */}
+      <label className="block text-sm text-gray-400 mb-2">或直接输入 emoji</label>
+      <input
+        type="text"
+        value={emojiInput}
+        onChange={e => handleEmojiInput(e.target.value)}
+        placeholder="粘贴 emoji 或按 Win+."
+        className="w-full px-4 py-2.5 rounded-xl border border-border text-sm text-ink focus:outline-none focus:border-blue-400 bg-white mb-4"
+      />
+
+      {/* 颜色选择器：7列，14色 */}
+      <label className="block text-sm text-gray-400 mb-2">颜色（可选）</label>
+      <div className="grid grid-cols-7 gap-2 mb-4">
+        {COLOR_PALETTE.map(c => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => setColor(color === c ? undefined : c)}
+            className={`w-8 h-8 rounded-full mx-auto transition-all ${
+              color === c ? 'ring-2 ring-offset-1 ring-blue-400 scale-110' : 'hover:scale-105'
+            }`}
+            style={{ backgroundColor: c }}
+            title={c}
+          />
+        ))}
+      </div>
+
+      {/* 名称 */}
       <label className="block text-sm text-gray-400 mb-2">名称</label>
       <input
         type="text"
