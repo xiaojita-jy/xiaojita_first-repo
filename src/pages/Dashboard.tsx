@@ -196,7 +196,6 @@ export default function Dashboard() {
               spent += byCategory.get(sub.id) || 0;
             });
             const pct = b.amount > 0 ? Math.round((spent / b.amount) * 100) : 0;
-            const remaining = b.amount - spent;
             return (
               <div key={b.id} className="mb-3 last:mb-0">
                 <div className="flex justify-between text-xs mb-1">
@@ -206,8 +205,10 @@ export default function Dashboard() {
                     )}
                     {cat?.icon} {cat?.name || '未知'}
                   </span>
-                  <span className={remaining < 0 ? 'text-red-500 font-medium' : 'text-gray-500'}>
-                    {remaining >= 0 ? `剩 ${formatAmount(remaining)}` : `超 ${formatAmount(Math.abs(remaining))}`}
+                  <span className="text-xs font-mono tabular-nums">
+                    <span className="text-expense">{formatAmount(spent)}</span>
+                    <span className="text-gray-400 mx-0.5">|</span>
+                    <span className="text-amber-500">{formatAmount(b.amount)}</span>
                   </span>
                 </div>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
