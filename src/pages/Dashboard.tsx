@@ -6,19 +6,25 @@ import { useReports } from '../hooks/useReports';
 import { useCategories } from '../hooks/useCategories';
 import { formatAmount, getCurrentMonth, getWeekRange } from '../utils/format';
 import type { Anomaly } from '../hooks/useReports';
+import type { BudgetAlert } from '../models';
 import EmptyState from '../components/EmptyState';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const currentMonth = getCurrentMonth();
   const { transactions, totals, loading, byCategory } = useTransactions(currentMonth);
-  const { budgets, calculateProgress } = useBudget();
+  const { budgets, calculateProgress, checkAlerts } = useBudget();
   const { getAnomalies } = useReports();
   const { getById, categories } = useCategories();
 
   const [budgetProgress, setBudgetProgress] = useState<{ budget: number; spent: number; remaining: number; percentage: number } | null>(null);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [showBackupReminder, setShowBackupReminder] = useState(false);
+  const [budgetAlerts, setBudgetAlerts] = useState<BudgetAlert[]>([]);
+
+  useEffect(() => {
+    checkAlerts(categories).then(setBudgetAlerts).catch(() => {});
+  }, [checkAlerts, categories, transactions]);
 
   useEffect(() => {
     calculateProgress().then(setBudgetProgress);
@@ -78,6 +84,30 @@ export default function Dashboard() {
           </p>
         </div>
       </div>
+
+      {budgetAlerts.length > 0 && (
+        <div className={`rounded-xl p-4 mb-4 ${
+          budgetAlerts.some(a => a.level === 'danger')
+            ? 'bg-red-50 border border-red-200'
+            : 'bg-amber-50 border border-amber-200'
+        }`}>
+          <p className={`text-sm font-medium mb-2 ${
+            budgetAlerts.some(a => a.level === 'danger') ? 'text-red-700' : 'text-amber-700'
+          }`}>
+            {budgetAlerts.some(a => a.level === 'danger') ? '🔴 预算超支提醒' : '⚠️ 预算预警'}
+          </p>
+          {budgetAlerts.map(a => (
+            <p key={a.categoryId ?? '__total__'} className={`text-xs mt-1 ${
+              a.level === 'danger' ? 'text-red-600' : 'text-amber-600'
+            }`}>
+              {a.categoryIcon} {a.categoryName}：
+              {a.level === 'danger'
+                ? `已超支 ${formatAmount(Math.abs(a.remaining))}`
+                : `已用 ${a.percentage}%，剩 ${formatAmount(a.remaining)}`}
+            </p>
+          ))}
+        </div>
+      )}
 
       {/* 本周概览 */}
       {(() => {
