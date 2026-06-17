@@ -241,9 +241,10 @@ export default function Records() {
                     onClick={() => toggleCategory(c.id)}
                     className={`px-2.5 py-1 rounded-full text-xs transition-colors cursor-pointer ${
                       active
-                        ? 'bg-blue-500 text-white'
+                        ? 'text-white'
                         : 'bg-[#f0ece6] text-gray-500 hover:bg-gray-200'
                     }`}
+                    style={active ? { backgroundColor: c.color || '#3b82f6' } : undefined}
                   >
                     {c.icon} {c.name}
                   </button>
@@ -260,9 +261,10 @@ export default function Records() {
                     onClick={() => toggleCategory(c.id)}
                     className={`px-2.5 py-1 rounded-full text-xs transition-colors cursor-pointer ${
                       active
-                        ? 'bg-green-500 text-white'
+                        ? 'text-white'
                         : 'bg-[#f0ece6] text-gray-500 hover:bg-gray-200'
                     }`}
+                    style={active ? { backgroundColor: c.color || '#22c55e' } : undefined}
                   >
                     {c.icon} {c.name}
                   </button>
