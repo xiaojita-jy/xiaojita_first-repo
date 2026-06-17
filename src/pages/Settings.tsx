@@ -10,7 +10,7 @@ import type { Category } from '../models';
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { categories, addCategory, updateCategory, deleteCategory } = useCategories();
+  const { categories, addCategory, updateCategory, deleteCategory, moveUp, moveDown } = useCategories();
   const [deleteError, setDeleteError] = useState('');
   const [importMsg, setImportMsg] = useState('');
   const [lastBackup, setLastBackup] = useState<string | null>(null);
@@ -188,6 +188,28 @@ export default function Settings() {
                       <button onClick={() => setAddForm({ parentId: cat.id, type: cat.type })} className="text-xs text-green-500">+子分类</button>
                       <button onClick={() => setEditingCategory(cat)} className="text-xs text-blue-400">编辑</button>
                       <button onClick={() => setDeleteTarget(cat.id)} className="text-xs text-red-400">删除</button>
+                      {(() => {
+                        const sibs = categories
+                          .filter(c => c.parentId === cat.parentId && c.type === cat.type)
+                          .sort((a, b) => a.order - b.order);
+                        const idx = sibs.findIndex(c => c.id === cat.id);
+                        return (
+                          <>
+                            <button
+                              onClick={() => moveUp(cat.id)}
+                              disabled={idx <= 0}
+                              className={`text-xs ${idx <= 0 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                              title="上移"
+                            >↑</button>
+                            <button
+                              onClick={() => moveDown(cat.id)}
+                              disabled={idx >= sibs.length - 1}
+                              className={`text-xs ${idx >= sibs.length - 1 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                              title="下移"
+                            >↓</button>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
@@ -226,6 +248,26 @@ export default function Settings() {
                       <div className="flex gap-2">
                         <button onClick={() => setEditingCategory(sub)} className="text-xs text-blue-400">编辑</button>
                         <button onClick={() => setDeleteTarget(sub.id)} className="text-xs text-red-400">删除</button>
+                        {(() => {
+                          const sibs = subs.sort((a, b) => a.order - b.order);
+                          const idx = sibs.findIndex(c => c.id === sub.id);
+                          return (
+                            <>
+                              <button
+                                onClick={() => moveUp(sub.id)}
+                                disabled={idx <= 0}
+                                className={`text-xs ${idx <= 0 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                                title="上移"
+                              >↑</button>
+                              <button
+                                onClick={() => moveDown(sub.id)}
+                                disabled={idx >= sibs.length - 1}
+                                className={`text-xs ${idx >= sibs.length - 1 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                                title="下移"
+                              >↓</button>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   )

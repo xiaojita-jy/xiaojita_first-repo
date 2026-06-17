@@ -56,11 +56,42 @@ export function useCategories(adapter: IAdapter = DexieAdapter) {
     await load();
   }, [load, adapter]);
 
+  /** 上移分类（与同级前一个分类交换 order） */
+  const moveUp = useCallback(async (id: string) => {
+    const target = categories.find(c => c.id === id);
+    if (!target) return;
+    const siblings = categories
+      .filter(c => c.parentId === target.parentId && c.type === target.type)
+      .sort((a, b) => a.order - b.order);
+    const idx = siblings.findIndex(c => c.id === id);
+    if (idx <= 0) return;
+    const prev = siblings[idx - 1];
+    await adapter.updateCategory(target.id, { order: prev.order });
+    await adapter.updateCategory(prev.id, { order: target.order });
+    await load();
+  }, [categories, adapter, load]);
+
+  /** 下移分类（与同级后一个分类交换 order） */
+  const moveDown = useCallback(async (id: string) => {
+    const target = categories.find(c => c.id === id);
+    if (!target) return;
+    const siblings = categories
+      .filter(c => c.parentId === target.parentId && c.type === target.type)
+      .sort((a, b) => a.order - b.order);
+    const idx = siblings.findIndex(c => c.id === id);
+    if (idx < 0 || idx >= siblings.length - 1) return;
+    const next = siblings[idx + 1];
+    await adapter.updateCategory(target.id, { order: next.order });
+    await adapter.updateCategory(next.id, { order: target.order });
+    await load();
+  }, [categories, adapter, load]);
+
   return {
     categories, loading, error,
     expenseCategories, incomeCategories,
     getSubs, getById,
     addCategory, updateCategory, deleteCategory,
+    moveUp, moveDown,
     reload: load,
   };
 }
