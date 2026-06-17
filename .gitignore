@@ -12,3 +12,4 @@ npm-debug.log*
 *.tsbuildinfo
 
 .vercel
+.worktrees
