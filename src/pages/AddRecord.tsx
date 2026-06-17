@@ -5,13 +5,16 @@ import CategoryPicker from '../components/CategoryPicker';
 import PaymentPicker from '../components/PaymentPicker';
 import { useCategories } from '../hooks/useCategories';
 import { useTransactions } from '../hooks/useTransactions';
-import { parseAmountToCents, getToday } from '../utils/format';
+import { useBudget } from '../hooks/useBudget';
+import { parseAmountToCents, getToday, formatAmount } from '../utils/format';
+import { showToast } from '../utils/toast';
 import type { PaymentMethod } from '../models';
 
 export default function AddRecord() {
   const navigate = useNavigate();
-  const { expenseCategories, incomeCategories, loading: catLoading, error: catError, getSubs } = useCategories();
+  const { expenseCategories, incomeCategories, loading: catLoading, error: catError, getSubs, categories: allCategories } = useCategories();
   const { add } = useTransactions();
+  const { checkAlerts } = useBudget();
 
   const [type, setType] = useState<'expense' | 'income'>('expense');
   const [amountStr, setAmountStr] = useState('');
@@ -60,6 +63,19 @@ export default function AddRecord() {
       setCategoryId('');
       setSubCategoryId(undefined);
       setNote('');
+      // 预算超支检查（保存后、跳转前）
+      try {
+        const alerts = await checkAlerts(allCategories);
+        for (const alert of alerts) {
+          if (alert.level === 'danger') {
+            showToast(`🔴 「${alert.categoryName}」已超支 ${formatAmount(Math.abs(alert.remaining))}`, 'danger');
+          } else {
+            showToast(`⚠️ 「${alert.categoryName}」预算已用 ${alert.percentage}%，剩 ${formatAmount(alert.remaining)}`, 'warning');
+          }
+        }
+      } catch {
+        // 预算检查失败不影响主流程
+      }
       setError('');
       setTimeout(() => navigate('/records'), 300);
     } catch {
