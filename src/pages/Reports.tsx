@@ -111,12 +111,24 @@ export default function Reports() {
       {/* Pie chart */}
       {pieData.length > 0 ? (
         <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
-          <h2 className="text-sm font-medium text-gray-800 mb-2">
-            {drilldownCategory ? `${drilldownCategory.categoryName} - 二级分类` : '支出构成'}
-            {drilldownCategory && (
-              <button onClick={() => setDrilldownId(null)} className="ml-2 text-xs text-blue-500">← 返回</button>
+          <div className="flex items-center gap-1 mb-2">
+            {drilldownCategory ? (
+              <>
+                <button
+                  onClick={() => setDrilldownId(null)}
+                  className="text-xs text-blue-500 hover:underline"
+                >
+                  📊 支出构成
+                </button>
+                <span className="text-xs text-gray-400">›</span>
+                <span className="text-sm font-medium text-gray-800">
+                  {drilldownCategory.icon} {drilldownCategory.categoryName}
+                </span>
+              </>
+            ) : (
+              <h2 className="text-sm font-medium text-gray-800">支出构成</h2>
             )}
-          </h2>
+          </div>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
