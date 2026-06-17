@@ -68,6 +68,7 @@ export default function Records() {
     if (!editing) return;
     const amountYuan = parseFloat(editing.amount);
     if (isNaN(amountYuan) || amountYuan <= 0) return;
+    if (!editing.categoryId) return;
     await update(editing.id, {
       type: editing.type,
       amount: Math.round(amountYuan * 100),
@@ -170,7 +171,7 @@ export default function Records() {
                               <button
                                 key={t}
                                 onClick={() => setEditing({ ...editing, type: t, categoryId: '' })}
-                                className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                                className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                                   editing.type === t ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500'
                                 }`}
                               >
@@ -199,6 +200,7 @@ export default function Records() {
                               onChange={e => setEditing({ ...editing, categoryId: e.target.value })}
                               className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm bg-white"
                             >
+                              <option value="" disabled>请选择分类</option>
                               {categories
                                 .filter(c => c.type === editing.type)
                                 .map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}{c.parentId ? ' (子)' : ''}</option>)}
