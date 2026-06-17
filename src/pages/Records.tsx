@@ -69,6 +69,7 @@ export default function Records() {
     const amountYuan = parseFloat(editing.amount);
     if (isNaN(amountYuan) || amountYuan <= 0) return;
     await update(editing.id, {
+      type: editing.type,
       amount: Math.round(amountYuan * 100),
       categoryId: editing.categoryId,
       paymentMethod: editing.paymentMethod,
@@ -164,6 +165,19 @@ export default function Records() {
                     return isEditing ? (
                       <div key={tx.id} className="bg-blue-50 rounded-xl p-3 border border-blue-200">
                         <div className="space-y-2">
+                          <div className="flex bg-gray-100 rounded-lg p-1">
+                            {(['expense', 'income'] as const).map(t => (
+                              <button
+                                key={t}
+                                onClick={() => setEditing({ ...editing, type: t, categoryId: '' })}
+                                className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                                  editing.type === t ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500'
+                                }`}
+                              >
+                                {t === 'expense' ? '💰 支出' : '💵 收入'}
+                              </button>
+                            ))}
+                          </div>
                           <div className="flex gap-2">
                             <input
                               type="text" inputMode="decimal"
