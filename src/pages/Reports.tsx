@@ -69,6 +69,7 @@ export default function Reports() {
   const pieData = breakdown.map(b => ({
     name: b.categoryName,
     value: b.amount / 100,
+    color: b.color,
     ...b,
   }));
 

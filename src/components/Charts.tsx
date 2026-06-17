@@ -7,7 +7,7 @@ import type { Transaction } from '../models';
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
 interface ChartsProps {
-  pieData: Array<{ name: string; value: number; categoryId: string; categoryName: string; icon: string; percentage: number; subCategories?: CategorySummary[] }>;
+  pieData: Array<{ name: string; value: number; color?: string; categoryId: string; categoryName: string; icon: string; percentage: number; subCategories?: CategorySummary[] }>;
   breakdown: CategorySummary[];
   drilldownId: string | null;
   drilldownCategory: CategorySummary | null;
@@ -106,8 +106,8 @@ export default function Charts({
                       }
                     }}
                   >
-                    {(drilldownCategory?.subCategories || breakdown).map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    {(drilldownCategory?.subCategories || breakdown).map((item: any, i: number) => (
+                      <Cell key={i} fill={item.color || COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value) => `¥${Number(value).toFixed(2)}`} />
@@ -116,7 +116,10 @@ export default function Charts({
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
                 {(drilldownCategory?.subCategories || pieData).map((d: any, i: number) => (
                   <span key={d.categoryName || d.name} className="text-xs text-gray-500">
-                    <span className="inline-block w-2 h-2 rounded-full mr-1" style={{ background: COLORS[i % COLORS.length] }} />
+                    <span
+                      className="inline-block w-2 h-2 rounded-full mr-1"
+                      style={{ background: d.color || COLORS[i % COLORS.length] }}
+                    />
                     {d.categoryName || d.name} {d.percentage}%
                   </span>
                 ))}
