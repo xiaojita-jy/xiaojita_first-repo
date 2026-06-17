@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import type { IAdapter } from '../../adapters/types';
 
 function createMockAdapter(overrides: Partial<IAdapter> = {}): IAdapter {
@@ -66,7 +66,10 @@ describe('useReports', () => {
 
     const { result } = renderHook(() => useReports(adapter));
 
-    const breakdown = await result.current.getCategoryBreakdown('2026-06');
+    let breakdown: any;
+    await act(async () => {
+      breakdown = await result.current.getCategoryBreakdown('2026-06');
+    });
     expect(breakdown).toEqual([]);
   });
 
@@ -82,7 +85,10 @@ describe('useReports', () => {
 
     const { result } = renderHook(() => useReports(adapter));
 
-    const breakdown = await result.current.getCategoryBreakdown('2026-06');
+    let breakdown: any;
+    await act(async () => {
+      breakdown = await result.current.getCategoryBreakdown('2026-06');
+    });
 
     expect(breakdown).toHaveLength(2);
 
@@ -116,7 +122,10 @@ describe('useReports', () => {
 
     const { result } = renderHook(() => useReports(adapter));
 
-    const anomalies = await result.current.getAnomalies('2026-06');
+    let anomalies: any;
+    await act(async () => {
+      anomalies = await result.current.getAnomalies('2026-06');
+    });
     expect(anomalies).toHaveLength(1);
     expect(anomalies[0].categoryId).toBe('cat_food');
     expect(anomalies[0].deviation).toBe(400);
@@ -141,7 +150,10 @@ describe('useReports', () => {
 
     const { result } = renderHook(() => useReports(adapter));
 
-    const anomalies = await result.current.getAnomalies('2026-06');
+    let anomalies: any;
+    await act(async () => {
+      anomalies = await result.current.getAnomalies('2026-06');
+    });
     expect(anomalies).toHaveLength(0);
   });
 
@@ -157,7 +169,10 @@ describe('useReports', () => {
 
     const { result } = renderHook(() => useReports(adapter));
 
-    const anomalies = await result.current.getAnomalies('2026-06');
+    let anomalies: any;
+    await act(async () => {
+      anomalies = await result.current.getAnomalies('2026-06');
+    });
     expect(anomalies).toHaveLength(0);
   });
 });
