@@ -6,7 +6,7 @@ import type { CalendarDay } from '../utils/format';
 
 const CURRENT_YEAR = new Date().getFullYear();
 const CURRENT_MONTH = new Date().getMonth() + 1;
-const YEARS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR + i);
+const YEARS = Array.from({ length: 9 }, (_, i) => CURRENT_YEAR - 2 + i);
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 export default function Calendar() {
@@ -14,7 +14,7 @@ export default function Calendar() {
   const [month, setMonth] = useState(CURRENT_MONTH);
   const navigate = useNavigate();
 
-  const { transactions } = useTransactions();
+  const { transactions, loading } = useTransactions();
 
   // 按日期汇总收支
   const dailySummary = useMemo(() => {
@@ -37,6 +37,15 @@ export default function Calendar() {
       navigate(`/records?date=${day.date}`);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="px-4 py-8">
+        <h1 className="text-xl font-bold text-ink mb-6">日历</h1>
+        <p className="text-center text-gray-400 py-10">加载中...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 py-8">
@@ -89,7 +98,7 @@ export default function Calendar() {
                 min-h-[52px] p-1.5 flex flex-col
                 ${day.isCurrentMonth ? 'bg-white' : 'bg-[#f8f6f2]'}
                 ${day.isToday ? 'ring-1 ring-inset ring-blue-400' : ''}
-                ${hasTransactions ? 'cursor-pointer active:bg-blue-50/50' : ''}
+                ${hasTransactions ? 'cursor-pointer hover:bg-blue-50/30 active:bg-blue-50/50' : ''}
                 transition-colors
               `}
             >
