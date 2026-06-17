@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
+import type { IAdapter } from '../../adapters/types';
 
-vi.mock('../../adapters/dexie', () => ({
-  DexieAdapter: {
+function createMockAdapter(overrides: Partial<IAdapter> = {}): IAdapter {
+  return {
     getAllTransactions: vi.fn(() => Promise.resolve([])),
     getTransactionsByMonth: vi.fn(() => Promise.resolve([])),
     getTransactionsByCategory: vi.fn(() => Promise.resolve([])),
@@ -23,13 +24,15 @@ vi.mock('../../adapters/dexie', () => ({
     getSetting: vi.fn(() => Promise.resolve(null)),
     setSetting: vi.fn(() => Promise.resolve()),
     seedDefaultCategories: vi.fn(() => Promise.resolve()),
-  },
-  db: {},
-}));
+    ...overrides,
+  };
+}
 
-import { useCategories } from '../useCategories';
-const adapterModule = await import('../../adapters/dexie');
-const mockAdapter = adapterModule.DexieAdapter;
+let useCategories: typeof import('../useCategories').useCategories;
+beforeAll(async () => {
+  const mod = await import('../useCategories');
+  useCategories = mod.useCategories;
+});
 
 const sampleCategories = [
   { id: 'cat_food', name: '餐饮', type: 'expense' as const, icon: '🍜', order: 1 },
@@ -39,23 +42,25 @@ const sampleCategories = [
 ];
 
 describe('useCategories', () => {
+  let adapter: IAdapter;
+
   beforeEach(() => {
-    vi.clearAllMocks();
-    (mockAdapter.getAllCategories as any).mockResolvedValue(sampleCategories);
+    adapter = createMockAdapter();
+    (adapter.getAllCategories as any).mockResolvedValue(sampleCategories);
   });
 
   it('挂载时播种默认分类并加载', async () => {
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderHook(() => useCategories(adapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(mockAdapter.seedDefaultCategories).toHaveBeenCalled();
-    expect(mockAdapter.getAllCategories).toHaveBeenCalled();
+    expect(adapter.seedDefaultCategories).toHaveBeenCalled();
+    expect(adapter.getAllCategories).toHaveBeenCalled();
     expect(result.current.categories).toHaveLength(4);
   });
 
   it('expenseCategories 只返回一级支出分类', async () => {
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderHook(() => useCategories(adapter));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.expenseCategories).toHaveLength(2);
@@ -63,7 +68,7 @@ describe('useCategories', () => {
   });
 
   it('incomeCategories 只返回收入分类', async () => {
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderHook(() => useCategories(adapter));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.incomeCategories).toHaveLength(1);
@@ -71,7 +76,7 @@ describe('useCategories', () => {
   });
 
   it('getSubs 根据 parentId 返回子分类', async () => {
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderHook(() => useCategories(adapter));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     const subs = result.current.getSubs('cat_food');
@@ -80,7 +85,7 @@ describe('useCategories', () => {
   });
 
   it('getById 根据 id 返回分类', async () => {
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderHook(() => useCategories(adapter));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     const cat = result.current.getById('cat_transport');
@@ -89,7 +94,7 @@ describe('useCategories', () => {
   });
 
   it('addCategory 调用 adapter 后重新加载', async () => {
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderHook(() => useCategories(adapter));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     const newCat = { id: 'cat_new', name: '新分类', type: 'expense' as const, icon: '📌', order: 100 };
@@ -97,36 +102,36 @@ describe('useCategories', () => {
       await result.current.addCategory(newCat);
     });
 
-    expect(mockAdapter.addCategory).toHaveBeenCalledWith(newCat);
-    expect(mockAdapter.getAllCategories).toHaveBeenCalledTimes(2);
+    expect(adapter.addCategory).toHaveBeenCalledWith(newCat);
+    expect(adapter.getAllCategories).toHaveBeenCalledTimes(2);
   });
 
   it('updateCategory 调用 adapter 后重新加载', async () => {
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderHook(() => useCategories(adapter));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await act(async () => {
       await result.current.updateCategory('cat_food', { name: '美食' });
     });
 
-    expect(mockAdapter.updateCategory).toHaveBeenCalledWith('cat_food', { name: '美食' });
+    expect(adapter.updateCategory).toHaveBeenCalledWith('cat_food', { name: '美食' });
   });
 
   it('deleteCategory 无交易记录时成功删除', async () => {
-    (mockAdapter.getTransactionCountByCategory as any).mockResolvedValue(0);
-    const { result } = renderHook(() => useCategories());
+    (adapter.getTransactionCountByCategory as any).mockResolvedValue(0);
+    const { result } = renderHook(() => useCategories(adapter));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await act(async () => {
       await result.current.deleteCategory('cat_food');
     });
 
-    expect(mockAdapter.deleteCategory).toHaveBeenCalledWith('cat_food');
+    expect(adapter.deleteCategory).toHaveBeenCalledWith('cat_food');
   });
 
   it('deleteCategory 有交易记录时抛出错误', async () => {
-    (mockAdapter.getTransactionCountByCategory as any).mockResolvedValue(5);
-    const { result } = renderHook(() => useCategories());
+    (adapter.getTransactionCountByCategory as any).mockResolvedValue(5);
+    const { result } = renderHook(() => useCategories(adapter));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await expect(act(async () => {

@@ -2,19 +2,20 @@ import { useState, useEffect, useCallback } from 'react';
 import { DexieAdapter } from '../adapters/dexie';
 import { generateId } from '../utils/format';
 import type { Transaction, PaymentMethod } from '../models';
+import type { IAdapter } from '../adapters/types';
 
-export function useTransactions(month?: string) {
+export function useTransactions(month?: string, adapter: IAdapter = DexieAdapter) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     const txs = month
-      ? await DexieAdapter.getTransactionsByMonth(month)
-      : await DexieAdapter.getAllTransactions();
+      ? await adapter.getTransactionsByMonth(month)
+      : await adapter.getAllTransactions();
     setTransactions(txs);
     setLoading(false);
-  }, [month]);
+  }, [month, adapter]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -32,20 +33,20 @@ export function useTransactions(month?: string) {
       ...data,
       createdAt: Date.now(),
     };
-    await DexieAdapter.addTransaction(tx);
+    await adapter.addTransaction(tx);
     await load();
     return tx;
-  }, [load]);
+  }, [load, adapter]);
 
   const update = useCallback(async (id: string, data: Partial<Transaction>) => {
-    await DexieAdapter.updateTransaction(id, data);
+    await adapter.updateTransaction(id, data);
     await load();
-  }, [load]);
+  }, [load, adapter]);
 
   const remove = useCallback(async (id: string) => {
-    await DexieAdapter.deleteTransaction(id);
+    await adapter.deleteTransaction(id);
     await load();
-  }, [load]);
+  }, [load, adapter]);
 
   const totals = useCallback(() => {
     const expense = transactions

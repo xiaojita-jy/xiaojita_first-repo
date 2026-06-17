@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { DexieAdapter } from '../adapters/dexie';
 import { ALL_DEFAULT_CATEGORIES } from '../models';
 import type { Category } from '../models';
+import type { IAdapter } from '../adapters/types';
 
-export function useCategories() {
+export function useCategories(adapter: IAdapter = DexieAdapter) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -12,8 +13,8 @@ export function useCategories() {
     setLoading(true);
     setError(null);
     try {
-      await DexieAdapter.seedDefaultCategories(ALL_DEFAULT_CATEGORIES);
-      const all = await DexieAdapter.getAllCategories();
+      await adapter.seedDefaultCategories(ALL_DEFAULT_CATEGORIES);
+      const all = await adapter.getAllCategories();
       setCategories(all);
     } catch (e: any) {
       console.error('useCategories load failed:', e);
@@ -21,7 +22,7 @@ export function useCategories() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [adapter]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -37,23 +38,23 @@ export function useCategories() {
   );
 
   const addCategory = useCallback(async (cat: Category) => {
-    await DexieAdapter.addCategory(cat);
+    await adapter.addCategory(cat);
     await load();
-  }, [load]);
+  }, [load, adapter]);
 
   const updateCategory = useCallback(async (id: string, data: Partial<Category>) => {
-    await DexieAdapter.updateCategory(id, data);
+    await adapter.updateCategory(id, data);
     await load();
-  }, [load]);
+  }, [load, adapter]);
 
   const deleteCategory = useCallback(async (id: string) => {
-    const count = await DexieAdapter.getTransactionCountByCategory(id);
+    const count = await adapter.getTransactionCountByCategory(id);
     if (count > 0) {
       throw new Error(`该分类下有 ${count} 条记录，请先迁移`);
     }
-    await DexieAdapter.deleteCategory(id);
+    await adapter.deleteCategory(id);
     await load();
-  }, [load]);
+  }, [load, adapter]);
 
   return {
     categories, loading, error,

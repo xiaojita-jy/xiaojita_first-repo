@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
+import type { IAdapter } from '../../adapters/types';
 
-// vi.mock hoists — must use vi.fn() directly in factory, no external variables
-vi.mock('../../adapters/dexie', () => ({
-  DexieAdapter: {
+function createMockAdapter(overrides: Partial<IAdapter> = {}): IAdapter {
+  return {
     getAllTransactions: vi.fn(() => Promise.resolve([])),
     getTransactionsByMonth: vi.fn(() => Promise.resolve([])),
     getTransactionsByCategory: vi.fn(() => Promise.resolve([])),
@@ -24,20 +24,21 @@ vi.mock('../../adapters/dexie', () => ({
     getSetting: vi.fn(() => Promise.resolve(null)),
     setSetting: vi.fn(() => Promise.resolve()),
     seedDefaultCategories: vi.fn(() => Promise.resolve()),
-  },
-  db: {},
-}));
+    ...overrides,
+  };
+}
 
-import { useTransactions } from '../useTransactions';
-// Re-import adapter after mock to get reference
-const adapterModule = await import('../../adapters/dexie');
-const mockAdapter = adapterModule.DexieAdapter;
+let useTransactions: typeof import('../useTransactions').useTransactions;
+beforeAll(async () => {
+  const mod = await import('../useTransactions');
+  useTransactions = mod.useTransactions;
+});
 
 describe('useTransactions', () => {
+  let adapter: IAdapter;
+
   beforeEach(() => {
-    vi.clearAllMocks();
-    // Reset defaults
-    (mockAdapter.getAllTransactions as any).mockResolvedValue([]);
+    adapter = createMockAdapter();
   });
 
   it('挂载时加载交易列表', async () => {
@@ -50,30 +51,30 @@ describe('useTransactions', () => {
       date: '2024-06-16',
       createdAt: Date.now(),
     };
-    (mockAdapter.getAllTransactions as any).mockResolvedValue([sampleTx]);
+    (adapter.getAllTransactions as any).mockResolvedValue([sampleTx]);
 
-    const { result } = renderHook(() => useTransactions());
+    const { result } = renderHook(() => useTransactions(undefined, adapter));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(mockAdapter.getAllTransactions).toHaveBeenCalled();
+    expect(adapter.getAllTransactions).toHaveBeenCalled();
     expect(result.current.transactions).toHaveLength(1);
   });
 
   it('传入 month 时按月份加载', async () => {
-    renderHook(() => useTransactions('2024-06'));
+    renderHook(() => useTransactions('2024-06', adapter));
 
     await waitFor(() => {
-      expect(mockAdapter.getTransactionsByMonth).toHaveBeenCalledWith('2024-06');
+      expect(adapter.getTransactionsByMonth).toHaveBeenCalledWith('2024-06');
     });
   });
 
   it('add 创建交易后重新加载', async () => {
-    (mockAdapter.getAllTransactions as any).mockResolvedValue([]);
+    (adapter.getAllTransactions as any).mockResolvedValue([]);
 
-    const { result } = renderHook(() => useTransactions());
+    const { result } = renderHook(() => useTransactions(undefined, adapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -87,8 +88,8 @@ describe('useTransactions', () => {
       });
     });
 
-    expect(mockAdapter.addTransaction).toHaveBeenCalled();
-    const callArg = (mockAdapter.addTransaction as any).mock.calls[0][0];
+    expect(adapter.addTransaction).toHaveBeenCalled();
+    const callArg = (adapter.addTransaction as any).mock.calls[0][0];
     expect(callArg.type).toBe('expense');
     expect(callArg.amount).toBe(2500);
     expect(callArg.id).toBeTruthy();
@@ -96,9 +97,9 @@ describe('useTransactions', () => {
   });
 
   it('update 调用 adapter 更新后重新加载', async () => {
-    (mockAdapter.getAllTransactions as any).mockResolvedValue([]);
+    (adapter.getAllTransactions as any).mockResolvedValue([]);
 
-    const { result } = renderHook(() => useTransactions());
+    const { result } = renderHook(() => useTransactions(undefined, adapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -106,13 +107,13 @@ describe('useTransactions', () => {
       await result.current.update('tx_1', { note: 'updated' });
     });
 
-    expect(mockAdapter.updateTransaction).toHaveBeenCalledWith('tx_1', { note: 'updated' });
+    expect(adapter.updateTransaction).toHaveBeenCalledWith('tx_1', { note: 'updated' });
   });
 
   it('remove 调用 adapter 删除后重新加载', async () => {
-    (mockAdapter.getAllTransactions as any).mockResolvedValue([]);
+    (adapter.getAllTransactions as any).mockResolvedValue([]);
 
-    const { result } = renderHook(() => useTransactions());
+    const { result } = renderHook(() => useTransactions(undefined, adapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -120,7 +121,7 @@ describe('useTransactions', () => {
       await result.current.remove('tx_1');
     });
 
-    expect(mockAdapter.deleteTransaction).toHaveBeenCalledWith('tx_1');
+    expect(adapter.deleteTransaction).toHaveBeenCalledWith('tx_1');
   });
 
   it('totals 正确计算收支结余', async () => {
@@ -129,9 +130,9 @@ describe('useTransactions', () => {
       { id: '2', type: 'expense' as const, amount: 3000, categoryId: 'cat_2', paymentMethod: 'cash' as const, date: '2024-06-16', createdAt: 2 },
       { id: '3', type: 'income' as const, amount: 10000, categoryId: 'cat_income', paymentMethod: 'bank_card' as const, date: '2024-06-16', createdAt: 3 },
     ];
-    (mockAdapter.getAllTransactions as any).mockResolvedValue(txs);
+    (adapter.getAllTransactions as any).mockResolvedValue(txs);
 
-    const { result } = renderHook(() => useTransactions());
+    const { result } = renderHook(() => useTransactions(undefined, adapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -149,9 +150,9 @@ describe('useTransactions', () => {
       { id: '3', type: 'expense' as const, amount: 2000, categoryId: 'cat_transport', paymentMethod: 'wechat' as const, date: '2024-06-16', createdAt: 3 },
       { id: '4', type: 'income' as const, amount: 10000, categoryId: 'cat_salary', paymentMethod: 'bank_card' as const, date: '2024-06-16', createdAt: 4 },
     ];
-    (mockAdapter.getAllTransactions as any).mockResolvedValue(txs);
+    (adapter.getAllTransactions as any).mockResolvedValue(txs);
 
-    const { result } = renderHook(() => useTransactions());
+    const { result } = renderHook(() => useTransactions(undefined, adapter));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 

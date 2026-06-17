@@ -1,26 +1,47 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense, lazy } from 'react';
 import { useReports, type CategorySummary, type Anomaly } from '../hooks/useReports';
 import { formatAmount, getCurrentMonth, getPastMonths, formatMonth } from '../utils/format';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
-import EmptyState from '../components/EmptyState';
+import type { Transaction } from '../models';
 
-const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+const Charts = lazy(() => import('../components/Charts'));
+
+function ChartFallback() {
+  return (
+    <div className="card p-4 mb-4">
+      <p className="text-center text-gray-400 py-10 text-sm">图表加载中...</p>
+    </div>
+  );
+}
 
 export default function Reports() {
   const [month, setMonth] = useState(getCurrentMonth());
-  const { monthlySummaries, getCategoryBreakdown, getAnomalies } = useReports();
+  const { monthlySummaries, getCategoryBreakdown, getSubCategoryTransactions, getAnomalies } = useReports();
   const [breakdown, setBreakdown] = useState<CategorySummary[]>([]);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [loading, setLoading] = useState(true);
   const [drilldownId, setDrilldownId] = useState<string | null>(null);
+  const [subDrilldownId, setSubDrilldownId] = useState<string | null>(null);
+  const [subTxs, setSubTxs] = useState<Transaction[]>([]);
+  const [subLoading, setSubLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
+    setDrilldownId(null);
+    setSubDrilldownId(null);
     Promise.all([
       getCategoryBreakdown(month).then(setBreakdown),
       getAnomalies(month).then(setAnomalies),
     ]).finally(() => setLoading(false));
   }, [month, getCategoryBreakdown, getAnomalies]);
+
+  useEffect(() => {
+    if (!subDrilldownId) { setSubTxs([]); return; }
+    setSubLoading(true);
+    getSubCategoryTransactions(subDrilldownId, month).then(txs => {
+      setSubTxs(txs);
+      setSubLoading(false);
+    });
+  }, [subDrilldownId, month, getSubCategoryTransactions]);
 
   const months = getPastMonths(12);
   const trendData = [...monthlySummaries].reverse().map(s => ({
@@ -36,6 +57,7 @@ export default function Reports() {
   }));
 
   const drilldownCategory = drilldownId ? breakdown.find(b => b.categoryId === drilldownId) : null;
+  const subDrilldownCategory = drilldownCategory?.subCategories?.find(s => s.categoryId === subDrilldownId) ?? null;
 
   const currentExpense = breakdown.reduce((s, b) => s + b.amount, 0);
   const currentMonthSummary = monthlySummaries.find(s => s.month === month);
@@ -59,7 +81,7 @@ export default function Reports() {
         ))}
       </select>
 
-      {/* Monthly summary */}
+      {/* Monthly summary — renders immediately */}
       <div className="card p-4 mb-4">
         <h2 className="text-sm font-semibold text-ink mb-3">月度收支汇总</h2>
         <div className="flex justify-around text-center">
@@ -108,82 +130,26 @@ export default function Reports() {
         </div>
       </div>
 
-      {/* Pie chart */}
-      {pieData.length > 0 ? (
-        <div className="card p-4 mb-4">
-          <div className="flex items-center gap-1 mb-2">
-            {drilldownCategory ? (
-              <>
-                <button
-                  onClick={() => setDrilldownId(null)}
-                  className="text-xs text-blue-500 hover:underline"
-                >
-                  📊 支出构成
-                </button>
-                <span className="text-xs text-gray-400">›</span>
-                <span className="text-sm font-semibold text-ink">
-                  {drilldownCategory.icon} {drilldownCategory.categoryName}
-                </span>
-              </>
-            ) : (
-              <h2 className="text-sm font-medium text-gray-800">支出构成</h2>
-            )}
-          </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie
-                data={
-                  drilldownCategory?.subCategories
-                    ? drilldownCategory.subCategories.map(s => ({ name: s.categoryName, value: s.amount / 100 }))
-                    : pieData
-                }
-                cx="50%" cy="50%" innerRadius={50} outerRadius={90}
-                paddingAngle={2} dataKey="value"
-                onClick={(data) => {
-                  if (!drilldownCategory) {
-                    const cat = breakdown.find(b => b.categoryName === data.name);
-                    if (cat?.subCategories?.length) setDrilldownId(cat.categoryId);
-                  }
-                }}
-              >
-                {(drilldownCategory?.subCategories || breakdown).map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => `¥${Number(value).toFixed(2)}`} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-            {pieData.map((d, i) => (
-              <span key={d.name} className="text-xs text-gray-500">
-                <span className="inline-block w-2 h-2 rounded-full mr-1" style={{ background: COLORS[i % COLORS.length] }} />
-                {d.name} {d.percentage}%
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <EmptyState icon="📊" message="暂无数据" />
-      )}
+      {/* Charts — lazy loaded */}
+      <Suspense fallback={<ChartFallback />}>
+        <Charts
+          pieData={pieData}
+          breakdown={breakdown}
+          drilldownId={drilldownId}
+          drilldownCategory={drilldownCategory ?? null}
+          subDrilldownCategory={subDrilldownCategory ?? null}
+          subTxs={subTxs}
+          subLoading={subLoading}
+          trendData={trendData}
+          onDrilldown={setDrilldownId}
+          onSubDrilldown={setSubDrilldownId}
+          onBack={() => { setDrilldownId(null); setSubDrilldownId(null); }}
+          onSubBack={() => setSubDrilldownId(null)}
+          hasPieData={pieData.length > 0}
+        />
+      </Suspense>
 
-      {/* Trend line */}
-      {trendData.length > 1 && (
-        <div className="card p-4 mb-4">
-          <h2 className="text-sm font-semibold text-ink mb-3">近6月趋势</h2>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={trendData.slice(-6)}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip formatter={(value) => `¥${Number(value).toFixed(2)}`} />
-              <Line type="monotone" dataKey="支出" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="收入" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {/* Anomalies */}
+      {/* Anomalies — no Recharts dependency, renders immediately */}
       {anomalies.length > 0 && (
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <h2 className="text-sm font-medium text-gray-800 mb-2">⚠️ 异常预警</h2>

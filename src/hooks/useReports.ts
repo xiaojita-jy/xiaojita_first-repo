@@ -91,6 +91,11 @@ export function useReports(adapter: IAdapter = DexieAdapter) {
     }).filter(s => s.amount > 0);
   }, [adapter]);
 
+  const getSubCategoryTransactions = useCallback(async (categoryId: string, month: string): Promise<Transaction[]> => {
+    const txs = await adapter.getTransactionsByCategory(categoryId, month);
+    return txs.filter(t => t.type === 'expense').sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
+  }, [adapter]);
+
   const getAnomalies = useCallback(async (month: string): Promise<Anomaly[]> => {
     const [y, m] = month.split('-').map(Number);
     const past3Months: string[] = [];
@@ -128,5 +133,5 @@ export function useReports(adapter: IAdapter = DexieAdapter) {
     return anomalies.sort((a, b) => b.deviation - a.deviation);
   }, [adapter]);
 
-  return { monthlySummaries, getCategoryBreakdown, getAnomalies, reload: loadMonthlySummaries };
+  return { monthlySummaries, getCategoryBreakdown, getSubCategoryTransactions, getAnomalies, reload: loadMonthlySummaries };
 }

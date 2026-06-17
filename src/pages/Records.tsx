@@ -38,6 +38,7 @@ export default function Records() {
     id: string; type: 'expense' | 'income'; amount: string;
     categoryId: string; paymentMethod: PaymentMethod; date: string; note: string;
   } | null>(null);
+  const [editError, setEditError] = useState('');
 
   const queryMonth = filterDate ? filterDate.slice(0, 7) : month;
   const { transactions, loading, remove, update } = useTransactions(queryMonth);
@@ -77,6 +78,7 @@ export default function Records() {
   };
 
   const handleEdit = (tx: Transaction) => {
+    setEditError('');
     setEditing({
       id: tx.id,
       type: tx.type,
@@ -91,8 +93,15 @@ export default function Records() {
   const handleSaveEdit = async () => {
     if (!editing) return;
     const amountYuan = parseFloat(editing.amount);
-    if (isNaN(amountYuan) || amountYuan <= 0) return;
-    if (!editing.categoryId) return;
+    if (isNaN(amountYuan) || amountYuan <= 0) {
+      setEditError('请输入有效金额');
+      return;
+    }
+    if (!editing.categoryId) {
+      setEditError('请选择分类');
+      return;
+    }
+    setEditError('');
     await update(editing.id, {
       type: editing.type,
       amount: Math.round(amountYuan * 100),
@@ -145,7 +154,7 @@ export default function Records() {
           ))}
         </select>
         {/* 分类多选标签 */}
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="flex gap-1.5 flex-wrap items-center">
           {categories
             .filter(c => !c.parentId && c.type === 'expense')
             .map(c => {
@@ -157,6 +166,25 @@ export default function Records() {
                   className={`px-2.5 py-1 rounded-full text-xs transition-colors cursor-pointer ${
                     active
                       ? 'bg-blue-500 text-white'
+                      : 'bg-[#f0ece6] text-gray-500 hover:bg-gray-200'
+                  }`}
+                >
+                  {c.icon} {c.name}
+                </button>
+              );
+            })}
+          <span className="text-gray-300 text-xs mx-0.5">|</span>
+          {categories
+            .filter(c => c.type === 'income' && !c.parentId)
+            .map(c => {
+              const active = filterCategories.has(c.id);
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => toggleCategory(c.id)}
+                  className={`px-2.5 py-1 rounded-full text-xs transition-colors cursor-pointer ${
+                    active
+                      ? 'bg-green-500 text-white'
                       : 'bg-[#f0ece6] text-gray-500 hover:bg-gray-200'
                   }`}
                 >
@@ -274,9 +302,10 @@ export default function Records() {
                             placeholder="备注"
                             className="w-full px-2 py-1 border border-gray-200 rounded text-sm"
                           />
+                          {editError && <p className="text-red-500 text-xs text-center">{editError}</p>}
                           <div className="flex gap-2 pt-1">
                             <button onClick={handleSaveEdit} className="flex-1 py-1.5 bg-blue-500 text-white rounded text-xs font-medium">保存</button>
-                            <button onClick={() => setEditing(null)} className="flex-1 py-1.5 border border-gray-300 text-gray-600 rounded text-xs">取消</button>
+                            <button onClick={() => { setEditing(null); setEditError(''); }} className="flex-1 py-1.5 border border-gray-300 text-gray-600 rounded text-xs">取消</button>
                           </div>
                         </div>
                       </div>
