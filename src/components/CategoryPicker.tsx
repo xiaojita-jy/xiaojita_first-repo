@@ -32,12 +32,18 @@ export default function CategoryPicker({
             key={cat.id}
             type="button"
             onClick={() => onCategoryChange(cat.id)}
-            className={`flex flex-col items-center py-3 px-1 rounded-xl border transition-colors ${
+            className={`flex flex-col items-center py-3 px-1 rounded-xl border transition-colors overflow-hidden ${
               selectedCategoryId === cat.id
                 ? 'bg-blue-50 border-blue-400'
                 : 'bg-white border-border'
             }`}
           >
+            {cat.color && (
+              <div
+                className="w-full h-1 -mt-3 mb-2"
+                style={{ backgroundColor: cat.color }}
+              />
+            )}
             <span className="text-2xl">{cat.icon}</span>
             <span className="text-xs mt-1 text-ink">{cat.name}</span>
           </button>
