@@ -117,7 +117,7 @@ export default function Reports() {
         <div className="flex justify-around text-center">
           <div>
             <p className="text-xs text-gray-400">支出</p>
-            <p className="text-lg font-bold text-expense font-mono tabular-nums">{formatAmount(currentExpense)}</p>
+            <p className="text-lg font-bold text-expense tabular-nums">{formatAmount(currentExpense)}</p>
             {(() => {
               const lastMonth = monthlySummaries.find(s => {
                 const [y, m] = queryMonth.split('-').map(Number);
@@ -138,7 +138,7 @@ export default function Reports() {
           </div>
           <div>
             <p className="text-xs text-gray-400">收入</p>
-            <p className="text-lg font-bold text-income font-mono tabular-nums">{formatAmount(currentIncome)}</p>
+            <p className="text-lg font-bold text-income tabular-nums">{formatAmount(currentIncome)}</p>
             {(() => {
               const lastMonth = monthlySummaries.find(s => {
                 const [y, m] = queryMonth.split('-').map(Number);

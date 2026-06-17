@@ -75,7 +75,7 @@ export default function Charts({
                       <span className="text-xs text-gray-400">{formatDateShort(tx.date)}</span>
                       {tx.note && <span className="text-xs text-gray-500 truncate max-w-[120px]">{tx.note}</span>}
                     </div>
-                    <span className="text-expense font-mono tabular-nums text-xs">{formatAmount(tx.amount)}</span>
+                    <span className="text-expense tabular-nums text-xs">{formatAmount(tx.amount)}</span>
                   </div>
                 ))}
                 <div className="text-right text-xs text-gray-400 pt-1 border-t border-gray-100">

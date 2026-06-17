@@ -69,15 +69,15 @@ export default function Dashboard() {
       <div className="grid grid-cols-3 gap-3 mb-5">
         <div className="card p-3 text-center">
           <p className="text-xs text-gray-400 mb-1">本月支出</p>
-          <p className="text-lg font-bold text-expense font-mono tabular-nums">{formatAmount(totals.expense)}</p>
+          <p className="text-lg font-bold text-expense tabular-nums">{formatAmount(totals.expense)}</p>
         </div>
         <div className="card p-3 text-center">
           <p className="text-xs text-gray-400 mb-1">本月收入</p>
-          <p className="text-lg font-bold text-income font-mono tabular-nums">{formatAmount(totals.income)}</p>
+          <p className="text-lg font-bold text-income tabular-nums">{formatAmount(totals.income)}</p>
         </div>
         <div className="card p-3 text-center">
           <p className="text-xs text-gray-400 mb-1">月度结余</p>
-          <p className={`text-lg font-bold font-mono tabular-nums ${
+          <p className={`text-lg font-bold tabular-nums ${
             totals.balance > 0 ? 'text-income' : totals.balance < 0 ? 'text-expense' : 'text-ink'
           }`}>
             {formatAmount(totals.balance)}
@@ -123,15 +123,15 @@ export default function Dashboard() {
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
                 <p className="text-xs text-gray-400 mb-0.5">本周支出</p>
-                <p className="text-base font-bold text-expense font-mono tabular-nums">{formatAmount(weekExpense)}</p>
+                <p className="text-base font-bold text-expense tabular-nums">{formatAmount(weekExpense)}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-400 mb-0.5">本周收入</p>
-                <p className="text-base font-bold text-income font-mono tabular-nums">{formatAmount(weekIncome)}</p>
+                <p className="text-base font-bold text-income tabular-nums">{formatAmount(weekIncome)}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-400 mb-0.5">日均支出</p>
-                <p className="text-base font-bold text-expense font-mono tabular-nums">{formatAmount(Math.round(weekExpense / weekDays))}</p>
+                <p className="text-base font-bold text-expense tabular-nums">{formatAmount(Math.round(weekExpense / weekDays))}</p>
               </div>
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function Dashboard() {
                     )}
                     {cat?.icon} {cat?.name || '未知'}
                   </span>
-                  <span className="text-xs font-mono tabular-nums">
+                  <span className="text-xs tabular-nums">
                     <span className="text-expense">{formatAmount(spent)}</span>
                     <span className="text-gray-400 mx-0.5">|</span>
                     <span className="text-amber-500">{formatAmount(b.amount)}</span>

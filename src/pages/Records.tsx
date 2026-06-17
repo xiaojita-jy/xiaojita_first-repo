@@ -302,8 +302,8 @@ export default function Records() {
         <div className="flex items-center justify-between text-sm mb-3 px-1">
           <span className="text-gray-500 text-xs">共{filtered.length}笔</span>
           <div className="flex gap-3">
-            <span className="text-expense font-mono tabular-nums">支出 {formatAmount(expenseTotal)}</span>
-            <span className="text-income font-mono tabular-nums">收入 {formatAmount(incomeTotal)}</span>
+            <span className="text-expense tabular-nums">支出 {formatAmount(expenseTotal)}</span>
+            <span className="text-income tabular-nums">收入 {formatAmount(incomeTotal)}</span>
           </div>
         </div>
       )}
@@ -343,8 +343,8 @@ export default function Records() {
                     {formatDateShort(date)} {getDayOfWeek(date)}
                   </span>
                   <div className="flex gap-3 text-xs">
-                    {dayExpense > 0 && <span className="text-expense font-mono tabular-nums">支出 {formatAmount(dayExpense)}</span>}
-                    {dayIncome > 0 && <span className="text-income font-mono tabular-nums">收入 {formatAmount(dayIncome)}</span>}
+                    {dayExpense > 0 && <span className="text-expense tabular-nums">支出 {formatAmount(dayExpense)}</span>}
+                    {dayIncome > 0 && <span className="text-income tabular-nums">收入 {formatAmount(dayIncome)}</span>}
                   </div>
                 </div>
                 {/* 当日交易列表 */}
@@ -435,7 +435,7 @@ export default function Records() {
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <div className="text-right">
-                            <span className={`text-sm font-semibold font-mono tabular-nums ${tx.type === 'expense' ? 'text-expense' : 'text-income'}`}>
+                            <span className={`text-sm font-semibold tabular-nums ${tx.type === 'expense' ? 'text-expense' : 'text-income'}`}>
                                                           {formatAmount(tx.amount)}
                             </span>
                             <span className="block text-[10px] text-gray-400">{getPaymentLabel(tx.paymentMethod)}</span>
