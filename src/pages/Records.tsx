@@ -21,7 +21,6 @@ export default function Records() {
 
   // 筛选
   const [typeFilter, setTypeFilter] = useState<'all' | 'expense' | 'income'>('all');
-  const [filterCategory, setFilterCategory] = useState<string>('');
   const [filterPayment, setFilterPayment] = useState<PaymentMethod | ''>('');
 
   // URL 参数（日历跳转来的按日筛选）
@@ -43,18 +42,11 @@ export default function Records() {
   const { checkAlerts } = useBudget();
 
   // 筛选逻辑
-  const hasActiveFilters = typeFilter !== 'all' || filterCategory !== '' || filterPayment !== '';
+  const hasActiveFilters = typeFilter !== 'all' || filterPayment !== '';
 
   const filtered = (() => {
     let result = transactions.filter(tx => {
       if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
-      if (filterCategory) {
-        const cat = getById(tx.categoryId);
-        const parentId = cat?.parentId ?? tx.categoryId;
-        if (tx.categoryId !== filterCategory && parentId !== filterCategory) {
-          return false;
-        }
-      }
       if (filterPayment && tx.paymentMethod !== filterPayment) return false;
       return true;
     });
@@ -185,19 +177,6 @@ export default function Records() {
                 <option value="all">全部类型</option>
                 <option value="expense">💰 支出</option>
                 <option value="income">💵 收入</option>
-              </select>
-              <select
-                value={filterCategory}
-                onChange={e => setFilterCategory(e.target.value)}
-                className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
-              >
-                <option value="">全部分类</option>
-                {categories
-                  .filter(c => !c.parentId)
-                  .sort((a, b) => a.order - b.order)
-                  .map(c => (
-                    <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
-                  ))}
               </select>
               <select
                 value={filterPayment}

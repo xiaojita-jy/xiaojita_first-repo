@@ -77,7 +77,9 @@ export default function Dashboard() {
         </div>
         <div className="card p-3 text-center">
           <p className="text-xs text-gray-400 mb-1">月度结余</p>
-          <p className="text-lg font-bold text-ink font-mono tabular-nums">
+          <p className={`text-lg font-bold font-mono tabular-nums ${
+            totals.balance > 0 ? 'text-income' : totals.balance < 0 ? 'text-expense' : 'text-ink'
+          }`}>
             {formatAmount(totals.balance)}
           </p>
         </div>
@@ -129,7 +131,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-xs text-gray-400 mb-0.5">日均支出</p>
-                <p className="text-base font-bold text-ink font-mono tabular-nums">{formatAmount(Math.round(weekExpense / weekDays))}</p>
+                <p className="text-base font-bold text-expense font-mono tabular-nums">{formatAmount(Math.round(weekExpense / weekDays))}</p>
               </div>
             </div>
           </div>
