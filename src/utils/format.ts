@@ -105,6 +105,49 @@ export function getDayOfWeek(dateStr: string): string {
   return DAYS[d.getDay()];
 }
 
+/** 日历格子数据 */
+export interface CalendarDay {
+  date: string;       // YYYY-MM-DD
+  day: number;        // 1-31
+  isToday: boolean;
+  isCurrentMonth: boolean;
+}
+
+/**
+ * 生成月历网格（周一始，iOS 风格）
+ * @returns 35 或 42 个 CalendarDay（5 或 6 周）
+ */
+export function getCalendarDays(year: number, month: number): CalendarDay[] {
+  const today = getToday();
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0);
+
+  // 周一起始偏移：周日(0) → 6，周一(1) → 0，...，周六(6) → 5
+  const startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+  const endOffset = lastDay.getDay() === 0 ? 6 : lastDay.getDay() - 1;
+
+  const totalDays = lastDay.getDate();
+  const totalCells = startOffset + totalDays + (6 - endOffset);
+
+  const days: CalendarDay[] = [];
+  // 起始日期 = 当月1号 - startOffset 天
+  const startDate = new Date(year, month - 1, 1 - startOffset);
+
+  for (let i = 0; i < totalCells; i++) {
+    const d = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + i);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    days.push({
+      date: dateStr,
+      day: d.getDate(),
+      isToday: dateStr === today,
+      isCurrentMonth: d.getMonth() === month - 1,
+    });
+  }
+
+  return days;
+}
+
 /**
  * 获取本周范围（周一到今天）
  * 返回 { start, end, days } 其中 days 是日期数组

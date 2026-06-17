@@ -11,7 +11,9 @@ import {
   formatMonth,
   getPastMonths,
   formatBackupTime,
+  getCalendarDays,
 } from '../format';
+import type { CalendarDay } from '../format';
 
 describe('centsToYuan', () => {
   it('0 分 → 0 元', () => expect(centsToYuan(0)).toBe(0));
@@ -130,5 +132,83 @@ describe('formatBackupTime', () => {
 
   it('非法 ISO 返回原字符串', () => {
     expect(formatBackupTime('invalid')).toBe('invalid');
+  });
+});
+
+describe('getCalendarDays', () => {
+  it('2026-06 返回 35 天（5 周，6月1日是周一，无需前置填充）', () => {
+    const days = getCalendarDays(2026, 6);
+    expect(days).toHaveLength(35);
+  });
+
+  it('2026-07 返回 35 天（5 周，7月1日是周三）', () => {
+    const days = getCalendarDays(2026, 7);
+    expect(days).toHaveLength(35);
+  });
+
+  it('2026-03 返回 42 天（6 周，3月1日是周日）', () => {
+    const days = getCalendarDays(2026, 3);
+    expect(days).toHaveLength(42);
+  });
+
+  it('第一天是当月的 1 号', () => {
+    const days = getCalendarDays(2026, 6);
+    const firstCurrent = days.find(d => d.isCurrentMonth)!;
+    expect(firstCurrent.day).toBe(1);
+    expect(firstCurrent.date).toBe('2026-06-01');
+  });
+
+  it('前置填充日 isCurrentMonth 为 false', () => {
+    const days = getCalendarDays(2026, 7); // 7月1日是周三，前2天是6月29、30
+    expect(days[0].isCurrentMonth).toBe(false);
+    expect(days[1].isCurrentMonth).toBe(false);
+    expect(days[2].isCurrentMonth).toBe(true); // 7月1日
+  });
+
+  it('后置填充日 isCurrentMonth 为 false', () => {
+    const days = getCalendarDays(2026, 6); // 6月30日是周二，后5天是7月1-5日
+    const lastFew = days.slice(-5);
+    lastFew.forEach(d => expect(d.isCurrentMonth).toBe(false));
+  });
+
+  it('2024-12 前置填充（12月1日是周日，前6天为11月）', () => {
+    const days = getCalendarDays(2024, 12);
+    const firstCurrent = days.find(d => d.isCurrentMonth)!;
+    expect(firstCurrent.date).toBe('2024-12-01');
+    expect(days[0].isCurrentMonth).toBe(false);
+    expect(days[0].date).toBe('2024-11-25');
+  });
+
+  it('跨年：2026-01 日历包含 2025-12 的前置日期', () => {
+    const days = getCalendarDays(2026, 1);
+    const firstPadding = days[0];
+    expect(firstPadding.isCurrentMonth).toBe(false);
+    expect(firstPadding.date).toBe('2025-12-29');
+  });
+
+  it('每周从周一开始，第一列为周一', () => {
+    const days = getCalendarDays(2026, 6);
+    // 2026-06-01 是周一，offset=0，第一格就是6月1日
+    const monday = new Date(days[0].date);
+    expect(monday.getDay()).toBe(1); // 周一
+  });
+
+  it('返回的日期字符串格式为 YYYY-MM-DD', () => {
+    const days = getCalendarDays(2026, 6);
+    days.forEach(d => {
+      expect(d.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
+  });
+
+  it('isToday 标记今天', () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const todayStr = `${year}-${String(month).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    const days = getCalendarDays(year, month);
+    const todayItem = days.find(d => d.date === todayStr);
+    expect(todayItem).toBeDefined();
+    expect(todayItem!.isToday).toBe(true);
   });
 });
