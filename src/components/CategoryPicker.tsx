@@ -23,7 +23,7 @@ export default function CategoryPicker({
 
   return (
     <div>
-      <label className="block text-sm text-gray-500 mb-2">
+      <label className="block text-sm text-gray-400 mb-2">
         {type === 'expense' ? '支出分类' : '收入分类'}
       </label>
       <div className="grid grid-cols-4 gap-3">
@@ -35,11 +35,11 @@ export default function CategoryPicker({
             className={`flex flex-col items-center py-3 px-1 rounded-xl border transition-colors ${
               selectedCategoryId === cat.id
                 ? 'bg-blue-50 border-blue-400'
-                : 'bg-white border-gray-200'
+                : 'bg-white border-border'
             }`}
           >
             <span className="text-2xl">{cat.icon}</span>
-            <span className="text-xs mt-1 text-gray-700">{cat.name}</span>
+            <span className="text-xs mt-1 text-ink">{cat.name}</span>
           </button>
         ))}
       </div>
@@ -54,7 +54,7 @@ export default function CategoryPicker({
               className={`px-3 py-1 rounded-full text-xs border transition-colors ${
                 selectedSubCategoryId === sub.id
                   ? 'bg-blue-500 text-white border-blue-500'
-                  : 'bg-white text-gray-600 border-gray-300'
+                  : 'bg-white text-gray-500 border-border'
               }`}
             >
               {sub.icon} {sub.name}

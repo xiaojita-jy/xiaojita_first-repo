@@ -104,14 +104,14 @@ export default function Records() {
   })();
 
   return (
-    <div className="px-4 py-6">
-      <h1 className="text-lg font-semibold text-gray-800 mb-4">流水</h1>
+    <div className="px-4 py-8">
+      <h1 className="text-xl font-bold text-ink mb-6">流水</h1>
 
-      <div className="flex gap-2 mb-4 flex-wrap">
+      <div className="flex gap-2 mb-5 flex-wrap">
         <select
           value={month}
           onChange={e => setMonth(e.target.value)}
-          className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm bg-white"
+          className="px-3 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
         >
           {MONTHS.map(m => (
             <option key={m} value={m}>{m}</option>
@@ -130,7 +130,7 @@ export default function Records() {
                   className={`px-2.5 py-1 rounded-full text-xs transition-colors cursor-pointer ${
                     active
                       ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      : 'bg-[#f0ece6] text-gray-500 hover:bg-gray-200'
                   }`}
                 >
                   {c.icon} {c.name}
@@ -141,7 +141,7 @@ export default function Records() {
         <select
           value={filterPayment}
           onChange={e => setFilterPayment(e.target.value as PaymentMethod | '')}
-          className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm bg-white"
+          className="px-3 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
         >
           <option value="">全部方式</option>
           <option value="wechat">微信</option>
@@ -154,8 +154,8 @@ export default function Records() {
       </div>
 
       <div className="flex justify-between text-sm mb-3 px-1">
-        <span className="text-red-500">支出 {formatAmount(expenseTotal)}</span>
-        <span className="text-green-500">收入 {formatAmount(incomeTotal)}</span>
+        <span className="text-expense font-mono tabular-nums">支出 {formatAmount(expenseTotal)}</span>
+        <span className="text-income font-mono tabular-nums">收入 {formatAmount(incomeTotal)}</span>
       </div>
 
       {loading ? (
@@ -171,12 +171,12 @@ export default function Records() {
               <div key={date}>
                 {/* 日期标题行 */}
                 <div className="flex items-center justify-between px-1 mb-2">
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-semibold text-ink">
                     {formatDateShort(date)} {getDayOfWeek(date)}
                   </span>
                   <div className="flex gap-3 text-xs">
-                    {dayExpense > 0 && <span className="text-red-500">支出 {formatAmount(dayExpense)}</span>}
-                    {dayIncome > 0 && <span className="text-green-500">收入 {formatAmount(dayIncome)}</span>}
+                    {dayExpense > 0 && <span className="text-expense font-mono tabular-nums">支出 {formatAmount(dayExpense)}</span>}
+                    {dayIncome > 0 && <span className="text-income font-mono tabular-nums">收入 {formatAmount(dayIncome)}</span>}
                   </div>
                 </div>
                 {/* 当日交易列表 */}
@@ -185,7 +185,7 @@ export default function Records() {
                     const cat = getById(tx.categoryId);
                     const isEditing = editing?.id === tx.id;
                     return isEditing ? (
-                      <div key={tx.id} className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                      <div key={tx.id} className="bg-blue-50/50 rounded-xl p-3 border border-blue-200">
                         <div className="space-y-2">
                           <div className="flex bg-gray-100 rounded-lg p-1">
                             {(['expense', 'income'] as const).map(t => (
@@ -253,16 +253,16 @@ export default function Records() {
                         </div>
                       </div>
                     ) : (
-                      <div key={tx.id} className="bg-white rounded-lg px-3 py-2 shadow-sm flex items-center justify-between">
+                      <div key={tx.id} className="card px-3 py-2.5 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{cat?.icon || '📌'}</span>
                           <div>
-                            <p className="text-sm text-gray-800">{cat?.name || '未知'}</p>
+                            <p className="text-sm text-ink">{cat?.name || '未知'}</p>
                             {tx.note && <p className="text-xs text-gray-400">{tx.note}</p>}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className={`text-sm font-semibold ${tx.type === 'expense' ? 'text-red-500' : 'text-green-500'}`}>
+                          <span className={`text-sm font-semibold font-mono tabular-nums ${tx.type === 'expense' ? 'text-expense' : 'text-income'}`}>
                             {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}
                           </span>
                           <div className="flex flex-col gap-0.5">

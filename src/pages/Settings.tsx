@@ -109,19 +109,19 @@ export default function Settings() {
   };
 
   return (
-    <div className="px-4 py-6">
-      <h1 className="text-lg font-semibold text-gray-800 mb-4">我的</h1>
+    <div className="px-4 py-8">
+      <h1 className="text-xl font-bold text-ink mb-6">我的</h1>
 
-      <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
+      <div className="card p-4 mb-4">
         <button onClick={() => navigate('/budget')} className="w-full flex items-center justify-between py-2">
           <span className="text-sm text-gray-800">💰 预算设置</span>
           <span className="text-gray-400">›</span>
         </button>
       </div>
 
-      <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
+      <div className="card p-4 mb-4">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-sm font-medium text-gray-800">分类管理</h2>
+          <h2 className="text-sm font-semibold text-ink">分类管理</h2>
           {!addForm && !editingCategory && (
             <button
               onClick={() => setAddForm({ type: 'expense' })}
@@ -214,8 +214,8 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
-        <h2 className="text-sm font-medium text-gray-800 mb-3">数据管理</h2>
+      <div className="card p-4 mb-4">
+        <h2 className="text-sm font-semibold text-ink mb-3">数据管理</h2>
         {importMsg && (
           <p className={`text-xs mb-2 ${importMsg.includes('成功') ? 'text-green-500' : 'text-red-500'}`}>{importMsg}</p>
         )}
@@ -226,8 +226,8 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-4 shadow-sm">
-        <h2 className="text-sm font-medium text-gray-800 mb-2">关于</h2>
+      <div className="card p-4">
+        <h2 className="text-sm font-semibold text-ink mb-2">关于</h2>
         <p className="text-xs text-gray-400">记账 v1.0.0 — 本地存储，你的数据只在你手里。</p>
       </div>
 

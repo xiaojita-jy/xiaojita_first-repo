@@ -10,11 +10,11 @@ const tabs = [
 
 export default function Layout() {
   return (
-    <div className="min-h-screen pb-16 bg-gray-50">
+    <div className="min-h-screen pb-16 bg-paper">
       <main className="max-w-lg mx-auto">
         <Outlet />
       </main>
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-border z-50">
         <div className="max-w-lg mx-auto flex justify-around">
           {tabs.map(tab => (
             <NavLink
@@ -22,8 +22,8 @@ export default function Layout() {
               to={tab.to}
               end={tab.to === '/'}
               className={({ isActive }) =>
-                `flex flex-col items-center py-2 px-3 text-xs ${
-                  isActive ? 'text-blue-600' : 'text-gray-500'
+                `flex flex-col items-center py-2 px-3 text-xs transition-colors ${
+                  isActive ? 'text-blue-600' : 'text-gray-400'
                 }`
               }
             >

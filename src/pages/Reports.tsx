@@ -42,17 +42,17 @@ export default function Reports() {
   const currentIncome = currentMonthSummary?.income ?? 0;
 
   if (loading) {
-    return <div className="px-4 py-6 text-center text-gray-400">加载中...</div>;
+    return <div className="px-4 py-8 text-center text-gray-400">加载中...</div>;
   }
 
   return (
-    <div className="px-4 py-6">
-      <h1 className="text-lg font-semibold text-gray-800 mb-4">报表</h1>
+    <div className="px-4 py-8">
+      <h1 className="text-xl font-bold text-ink mb-6">报表</h1>
 
       <select
         value={month}
         onChange={e => setMonth(e.target.value)}
-        className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm bg-white mb-4"
+        className="px-3 py-1.5 rounded-lg border border-border text-sm bg-white text-ink mb-5"
       >
         {months.map(m => (
           <option key={m} value={m}>{formatMonth(m)}</option>
@@ -60,12 +60,12 @@ export default function Reports() {
       </select>
 
       {/* Monthly summary */}
-      <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
-        <h2 className="text-sm font-medium text-gray-800 mb-3">月度收支汇总</h2>
+      <div className="card p-4 mb-4">
+        <h2 className="text-sm font-semibold text-ink mb-3">月度收支汇总</h2>
         <div className="flex justify-around text-center">
           <div>
             <p className="text-xs text-gray-400">支出</p>
-            <p className="text-lg font-bold text-red-500">{formatAmount(currentExpense)}</p>
+            <p className="text-lg font-bold text-expense font-mono tabular-nums">{formatAmount(currentExpense)}</p>
             {(() => {
               const lastMonth = monthlySummaries.find(s => {
                 const [y, m] = month.split('-').map(Number);
@@ -86,7 +86,7 @@ export default function Reports() {
           </div>
           <div>
             <p className="text-xs text-gray-400">收入</p>
-            <p className="text-lg font-bold text-green-500">{formatAmount(currentIncome)}</p>
+            <p className="text-lg font-bold text-income font-mono tabular-nums">{formatAmount(currentIncome)}</p>
             {(() => {
               const lastMonth = monthlySummaries.find(s => {
                 const [y, m] = month.split('-').map(Number);
@@ -110,7 +110,7 @@ export default function Reports() {
 
       {/* Pie chart */}
       {pieData.length > 0 ? (
-        <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
+        <div className="card p-4 mb-4">
           <div className="flex items-center gap-1 mb-2">
             {drilldownCategory ? (
               <>
@@ -121,7 +121,7 @@ export default function Reports() {
                   📊 支出构成
                 </button>
                 <span className="text-xs text-gray-400">›</span>
-                <span className="text-sm font-medium text-gray-800">
+                <span className="text-sm font-semibold text-ink">
                   {drilldownCategory.icon} {drilldownCategory.categoryName}
                 </span>
               </>
@@ -168,8 +168,8 @@ export default function Reports() {
 
       {/* Trend line */}
       {trendData.length > 1 && (
-        <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
-          <h2 className="text-sm font-medium text-gray-800 mb-3">近6月趋势</h2>
+        <div className="card p-4 mb-4">
+          <h2 className="text-sm font-semibold text-ink mb-3">近6月趋势</h2>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={trendData.slice(-6)}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

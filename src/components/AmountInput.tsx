@@ -11,7 +11,7 @@ export default function AmountInput({ value, onChange }: Props) {
   return (
     <div className="py-6 text-center">
       <div
-        className="text-4xl font-bold text-gray-800 flex items-center justify-center"
+        className="text-4xl font-bold text-ink font-mono tabular-nums flex items-center justify-center"
         onClick={() => inputRef.current?.focus()}
       >
         <span className="text-2xl mr-1">¥</span>

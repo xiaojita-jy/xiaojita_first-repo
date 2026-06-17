@@ -72,16 +72,16 @@ export default function AddRecord() {
   const canSave = amountStr && categoryId && !saving;
 
   return (
-    <div className="px-4 py-6">
-      <h1 className="text-lg font-semibold text-gray-800 mb-4">记一笔</h1>
+    <div className="px-4 py-8">
+      <h1 className="text-xl font-bold text-ink mb-6">记一笔</h1>
 
-      <div className="flex bg-gray-100 rounded-lg p-1 mb-5">
+      <div className="flex bg-[#f0ece6] rounded-lg p-1 mb-5">
         {(['expense', 'income'] as const).map(t => (
           <button
             key={t}
             onClick={() => { setType(t); setCategoryId(''); setSubCategoryId(undefined); }}
-            className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
-              type === t ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500'
+            className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${
+              type === t ? 'bg-white text-ink shadow-sm' : 'text-gray-400'
             }`}
           >
             {t === 'expense' ? '💰 支出' : '💵 收入'}
@@ -109,25 +109,25 @@ export default function AddRecord() {
         )}
 
         <div>
-          <label className="block text-sm text-gray-500 mb-2">日期</label>
+          <label className="block text-sm text-gray-400 mb-2">日期</label>
           <input
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400"
+            className="w-full px-4 py-2.5 rounded-xl border border-border text-sm text-ink focus:outline-none focus:border-blue-400 bg-white"
           />
         </div>
 
         <PaymentPicker value={paymentMethod} onChange={setPaymentMethod} />
 
         <div>
-          <label className="block text-sm text-gray-500 mb-2">备注（选填）</label>
+          <label className="block text-sm text-gray-400 mb-2">备注（选填）</label>
           <input
             type="text"
             value={note}
             onChange={e => setNote(e.target.value)}
             placeholder="例如：和同事AA午餐"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400"
+            className="w-full px-4 py-2.5 rounded-xl border border-border text-sm text-ink focus:outline-none focus:border-blue-400 bg-white"
           />
         </div>
       </div>

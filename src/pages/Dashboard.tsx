@@ -40,13 +40,13 @@ export default function Dashboard() {
   }, []);
 
   if (loading) {
-    return <div className="px-4 py-6 text-center text-gray-400">加载中...</div>;
+    return <div className="px-4 py-8 text-center text-gray-400">加载中...</div>;
   }
 
   if (transactions.length === 0) {
     return (
-      <div className="px-4 py-6">
-        <h1 className="text-lg font-semibold text-gray-800 mb-2">概览</h1>
+      <div className="px-4 py-8">
+        <h1 className="text-xl font-bold text-ink mb-2">概览</h1>
         <EmptyState
           icon="📝"
           message="还没有记账，开始第一笔吧"
@@ -57,21 +57,23 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="px-4 py-6">
-      <h1 className="text-lg font-semibold text-gray-800 mb-4">概览</h1>
+    <div className="px-4 py-8">
+      <h1 className="text-xl font-bold text-ink mb-6">概览</h1>
 
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="bg-white rounded-xl p-3 shadow-sm text-center">
-          <p className="text-xs text-gray-500">本月支出</p>
-          <p className="text-lg font-bold text-red-500 mt-1">{formatAmount(totals.expense)}</p>
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="card p-3 text-center">
+          <p className="text-xs text-gray-400 mb-1">本月支出</p>
+          <p className="text-lg font-bold text-expense font-mono tabular-nums">{formatAmount(totals.expense)}</p>
         </div>
-        <div className="bg-white rounded-xl p-3 shadow-sm text-center">
-          <p className="text-xs text-gray-500">本月收入</p>
-          <p className="text-lg font-bold text-green-500 mt-1">{formatAmount(totals.income)}</p>
+        <div className="card p-3 text-center">
+          <p className="text-xs text-gray-400 mb-1">本月收入</p>
+          <p className="text-lg font-bold text-income font-mono tabular-nums">{formatAmount(totals.income)}</p>
         </div>
-        <div className="bg-white rounded-xl p-3 shadow-sm text-center">
-          <p className="text-xs text-gray-500">月度结余</p>
-          <p className={`text-lg font-bold mt-1 ${totals.balance >= 0 ? 'text-blue-500' : 'text-red-500'}`}>
+        <div className="card p-3 text-center">
+          <p className="text-xs text-gray-400 mb-1">月度结余</p>
+          <p className={`text-2xl font-bold font-mono tabular-nums ${
+            totals.balance > 0 ? 'text-gradient-positive' : totals.balance < 0 ? 'text-gradient-negative' : 'text-gradient-neutral'
+          }`}>
             {formatAmount(totals.balance)}
           </p>
         </div>
@@ -86,20 +88,20 @@ export default function Dashboard() {
         const weekDays = week.days.length;
         if (weekTxs.length === 0) return null;
         return (
-          <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
-            <h3 className="text-sm font-medium text-gray-800 mb-3">本周概览</h3>
+          <div className="card p-4 mb-4">
+            <h3 className="text-sm font-semibold text-ink mb-3">本周概览</h3>
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
-                <p className="text-xs text-gray-400">本周支出</p>
-                <p className="text-base font-bold text-red-500">{formatAmount(weekExpense)}</p>
+                <p className="text-xs text-gray-400 mb-0.5">本周支出</p>
+                <p className="text-base font-bold text-expense font-mono tabular-nums">{formatAmount(weekExpense)}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-400">本周收入</p>
-                <p className="text-base font-bold text-green-500">{formatAmount(weekIncome)}</p>
+                <p className="text-xs text-gray-400 mb-0.5">本周收入</p>
+                <p className="text-base font-bold text-income font-mono tabular-nums">{formatAmount(weekIncome)}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-400">日均支出</p>
-                <p className="text-base font-bold text-gray-700">{formatAmount(Math.round(weekExpense / weekDays))}</p>
+                <p className="text-xs text-gray-400 mb-0.5">日均支出</p>
+                <p className="text-base font-bold text-ink font-mono tabular-nums">{formatAmount(Math.round(weekExpense / weekDays))}</p>
               </div>
             </div>
           </div>
@@ -130,22 +132,22 @@ export default function Dashboard() {
       )}
 
       {budgetProgress && (
-        <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
+        <div className="card p-4 mb-4">
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-gray-500">月度预算</span>
-            <span className="text-gray-800 font-medium">
+            <span className="text-gray-400">月度预算</span>
+            <span className="text-ink font-medium font-mono tabular-nums">
               {formatAmount(budgetProgress.spent)} / {formatAmount(budgetProgress.budget)}
             </span>
           </div>
-          <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${
-                budgetProgress.percentage > 100 ? 'bg-red-500' : budgetProgress.percentage > 80 ? 'bg-yellow-500' : 'bg-blue-500'
+                budgetProgress.percentage > 100 ? 'bg-expense' : budgetProgress.percentage > 80 ? 'bg-yellow-500' : 'bg-blue-500'
               }`}
               style={{ width: `${Math.min(budgetProgress.percentage, 100)}%` }}
             />
           </div>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-gray-400 mt-1.5">
             {budgetProgress.remaining > 0
               ? `剩余 ${formatAmount(budgetProgress.remaining)}`
               : `已超支 ${formatAmount(Math.abs(budgetProgress.remaining))}`}
@@ -154,8 +156,8 @@ export default function Dashboard() {
       )}
 
       {budgets.filter(b => b.categoryId && b.categoryId !== '__total__').length > 0 && (
-        <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
-          <h3 className="text-sm font-medium text-gray-800 mb-3">分类预算</h3>
+        <div className="card p-4 mb-4">
+          <h3 className="text-sm font-semibold text-ink mb-3">分类预算</h3>
           {budgets.filter(b => b.categoryId && b.categoryId !== '__total__').map(b => {
             const cat = getById(b.categoryId!);
             // 包含子分类的支出汇总
