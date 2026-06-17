@@ -1,17 +1,52 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTransactions } from '../hooks/useTransactions';
 import { useCategories } from '../hooks/useCategories';
 import { formatAmount, formatDateShort, getYearOptions, getMonthOptions, getDayOfWeek } from '../utils/format';
-import { PAYMENT_METHODS, type PaymentMethod } from '../models';
+import { PAYMENT_METHODS, type PaymentMethod, type Transaction, type Category } from '../models';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
-import type { Transaction } from '../models';
 import { useBudget } from '../hooks/useBudget';
 import { showToast } from '../utils/toast';
 
 const CURRENT_YEAR = new Date().getFullYear();
 const CURRENT_MONTH = new Date().getMonth() + 1;
+
+/** 搜索匹配：金额、备注、支付方式、分类名称 */
+function matchesSearch(tx: Transaction, query: string, getById: (id: string) => Category | undefined, categories: Category[]): boolean {
+  const q = query.toLowerCase().trim();
+  if (!q) return false;
+
+  // 金额
+  if (formatAmount(tx.amount).includes(q)) return true;
+
+  // 备注
+  if (tx.note?.toLowerCase().includes(q)) return true;
+
+  // 支付方式
+  const pmLabel = PAYMENT_METHODS.find(p => p.value === tx.paymentMethod)?.label;
+  if (pmLabel?.includes(q)) return true;
+
+  // 分类名称
+  const cat = getById(tx.categoryId);
+  if (cat) {
+    if (cat.name.toLowerCase().includes(q)) return true;
+    if (cat.parentId) {
+      const parent = getById(cat.parentId);
+      if (parent) {
+        if (parent.name.toLowerCase().includes(q)) return true;
+        // "餐饮·外卖"
+        if (`${parent.name}·${cat.name}`.toLowerCase().includes(q)) return true;
+      }
+    } else {
+      // 一级分类：也搜其子分类名
+      const subs = categories.filter(c => c.parentId === cat.id);
+      if (subs.some(s => s.name.toLowerCase().includes(q))) return true;
+    }
+  }
+
+  return false;
+}
 
 export default function Records() {
   // 年月选择
@@ -22,6 +57,24 @@ export default function Records() {
   // 筛选
   const [typeFilter, setTypeFilter] = useState<'all' | 'expense' | 'income'>('all');
   const [filterPayment, setFilterPayment] = useState<PaymentMethod | ''>('');
+
+  // 搜索
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchMode, setSearchMode] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const isSearchActive = searchMode && searchQuery.trim().length > 0;
+
+  // 搜索框自动聚焦
+  useEffect(() => {
+    if (searchMode && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchMode]);
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSearchMode(false);
+  };
 
   // URL 参数（日历跳转来的按日筛选）
   const [searchParams, setSearchParams] = useSearchParams();
@@ -35,9 +88,10 @@ export default function Records() {
   } | null>(null);
   const [editError, setEditError] = useState('');
 
-  // 数据
-  const queryMonthActual = filterDate ? filterDate.slice(0, 7) : queryMonth;
-  const { transactions, loading, remove, update } = useTransactions(queryMonthActual);
+  // 数据：搜索时加载全量，否则按月加载
+  const queryMonthActual = (filterDate && !isSearchActive) ? filterDate.slice(0, 7) : queryMonth;
+  const monthParam = isSearchActive ? undefined : queryMonthActual;
+  const { transactions, loading, remove, update } = useTransactions(monthParam);
   const { categories, getById } = useCategories();
   const { checkAlerts } = useBudget();
 
@@ -45,6 +99,9 @@ export default function Records() {
   const hasActiveFilters = typeFilter !== 'all' || filterPayment !== '';
 
   const filtered = (() => {
+    if (isSearchActive) {
+      return transactions.filter(tx => matchesSearch(tx, searchQuery, getById, categories));
+    }
     let result = transactions.filter(tx => {
       if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
       if (filterPayment && tx.paymentMethod !== filterPayment) return false;
@@ -145,56 +202,88 @@ export default function Records() {
 
   return (
     <div className="px-4 py-8">
-      {/* === 第一行：标题 + 年月/筛选下拉 === */}
-      <div className="flex items-center gap-2 mb-3">
-        <h1 className="text-xl font-bold text-ink">流水</h1>
-        <div className="flex gap-1.5 ml-auto">
-          <select
-            value={year}
-            onChange={e => handleYearChange(Number(e.target.value))}
-            className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
-          >
-            {yearOptions.map(y => (
-              <option key={y} value={y}>{y}年</option>
-            ))}
-          </select>
-          <select
-            value={month}
-            onChange={e => setMonth(Number(e.target.value))}
-            className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
-          >
-            {monthOptions.map(m => (
-              <option key={m} value={m}>{m}月</option>
-            ))}
-          </select>
-          {!filterDate && (
-            <>
-              <select
-                value={typeFilter}
-                onChange={e => setTypeFilter(e.target.value as 'all' | 'expense' | 'income')}
-                className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+      {/* === 标题行：搜索模式 vs 普通模式 === */}
+      {searchMode ? (
+        <div className="flex items-center gap-2 mb-3">
+          <button onClick={clearSearch} className="text-blue-500 text-sm flex-shrink-0 cursor-pointer">← 返回</button>
+          <div className="flex-1 relative">
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Escape') clearSearch(); }}
+              placeholder="搜分类、备注、金额、支付方式..."
+              className="w-full px-3 py-1.5 pr-8 rounded-lg border border-blue-300 bg-blue-50 text-sm text-ink focus:outline-none focus:border-blue-400"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
               >
-                <option value="all">全部类型</option>
-                <option value="expense">💰 支出</option>
-                <option value="income">💵 收入</option>
-              </select>
-              <select
-                value={filterPayment}
-                onChange={e => setFilterPayment(e.target.value as PaymentMethod | '')}
-                className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
-              >
-                <option value="">全部方式</option>
-                {PAYMENT_METHODS.map(pm => (
-                  <option key={pm.value} value={pm.value}>{pm.label}</option>
-                ))}
-              </select>
-            </>
-          )}
+                ✕
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center gap-2 mb-3">
+          <h1 className="text-xl font-bold text-ink">流水</h1>
+          <button
+            onClick={() => setSearchMode(true)}
+            className="text-gray-400 hover:text-ink ml-0.5 cursor-pointer"
+            title="搜索"
+          >
+            🔍
+          </button>
+          <div className="flex gap-1.5 ml-auto">
+            {!filterDate && (
+              <>
+                <select
+                  value={year}
+                  onChange={e => handleYearChange(Number(e.target.value))}
+                  className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+                >
+                  {yearOptions.map(y => (
+                    <option key={y} value={y}>{y}年</option>
+                  ))}
+                </select>
+                <select
+                  value={month}
+                  onChange={e => setMonth(Number(e.target.value))}
+                  className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+                >
+                  {monthOptions.map(m => (
+                    <option key={m} value={m}>{m}月</option>
+                  ))}
+                </select>
+                <select
+                  value={typeFilter}
+                  onChange={e => setTypeFilter(e.target.value as 'all' | 'expense' | 'income')}
+                  className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+                >
+                  <option value="all">全部类型</option>
+                  <option value="expense">💰 支出</option>
+                  <option value="income">💵 收入</option>
+                </select>
+                <select
+                  value={filterPayment}
+                  onChange={e => setFilterPayment(e.target.value as PaymentMethod | '')}
+                  className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+                >
+                  <option value="">全部方式</option>
+                  {PAYMENT_METHODS.map(pm => (
+                    <option key={pm.value} value={pm.value}>{pm.label}</option>
+                  ))}
+                </select>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
-      {/* 日历跳转日期提示 */}
-      {filterDate && (
+      {/* 日历跳转日期提示（搜索模式下隐藏） */}
+      {filterDate && !searchMode && (
         <div className="flex items-center gap-2 mb-3">
           <span className="text-sm font-medium text-ink ml-auto">
             {formatDateShort(filterDate)} {getDayOfWeek(filterDate)}
@@ -209,21 +298,37 @@ export default function Records() {
       )}
 
       {/* === 汇总栏 === */}
-      <div className="flex items-center justify-between text-sm mb-3 px-1">
-        <span className="text-gray-500 text-xs">共{filtered.length}笔</span>
-        <div className="flex gap-3">
-          <span className="text-expense font-mono tabular-nums">支出 {formatAmount(expenseTotal)}</span>
-          <span className="text-income font-mono tabular-nums">收入 {formatAmount(incomeTotal)}</span>
+      {!isSearchActive && (
+        <div className="flex items-center justify-between text-sm mb-3 px-1">
+          <span className="text-gray-500 text-xs">共{filtered.length}笔</span>
+          <div className="flex gap-3">
+            <span className="text-expense font-mono tabular-nums">支出 {formatAmount(expenseTotal)}</span>
+            <span className="text-income font-mono tabular-nums">收入 {formatAmount(incomeTotal)}</span>
+          </div>
         </div>
-      </div>
+      )}
+
+      {isSearchActive && (
+        <div className="text-xs text-gray-400 mb-3 px-1">
+          {searchQuery.trim()
+            ? `搜索"${searchQuery.trim()}"，找到 ${filtered.length} 笔记录`
+            : '输入关键词搜索'}
+        </div>
+      )}
 
       {/* === 记录列表 === */}
       {loading ? (
         <p className="text-center text-gray-400 py-10">加载中...</p>
       ) : filtered.length === 0 ? (
         <EmptyState
-          icon="📋"
-          message={hasActiveFilters ? '筛选无结果，试试调整条件' : '本月无记录'}
+          icon={isSearchActive ? '🔍' : '📋'}
+          message={
+            isSearchActive
+              ? `未找到匹配"${searchQuery.trim()}"的记录`
+              : hasActiveFilters
+                ? '筛选无结果，试试调整条件'
+                : '本月无记录'
+          }
         />
       ) : (
         <div className="space-y-4">
