@@ -13,7 +13,6 @@ import {
   formatBackupTime,
   getCalendarDays,
 } from '../format';
-import type { CalendarDay } from '../format';
 
 describe('centsToYuan', () => {
   it('0 分 → 0 元', () => expect(centsToYuan(0)).toBe(0));
