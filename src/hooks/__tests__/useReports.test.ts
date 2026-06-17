@@ -22,6 +22,7 @@ function createMockAdapter(overrides: Partial<IAdapter> = {}): IAdapter {
     getAllBudgets: vi.fn(() => Promise.resolve([])),
     setBudget: vi.fn(() => Promise.resolve()),
     deleteBudget: vi.fn(() => Promise.resolve()),
+    deleteBudgetsByCategory: vi.fn(() => Promise.resolve()),
     getSetting: vi.fn(() => Promise.resolve(null)),
     setSetting: vi.fn(() => Promise.resolve()),
     seedDefaultCategories: vi.fn(() => Promise.resolve()),

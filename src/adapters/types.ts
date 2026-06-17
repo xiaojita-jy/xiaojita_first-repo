@@ -23,6 +23,7 @@ export interface IAdapter {
   getAllBudgets(month: string): Promise<Budget[]>;
   setBudget(budget: Budget): Promise<void>;
   deleteBudget(id: string): Promise<void>;
+  deleteBudgetsByCategory(categoryId: string): Promise<void>;
 
   // —— Settings ——
   getSetting(key: string): Promise<string | null>;

@@ -12,7 +12,15 @@ export function useBudget(month?: string, adapter: IAdapter = DexieAdapter) {
   const load = useCallback(async () => {
     setLoading(true);
     const all = await adapter.getAllBudgets(currentMonth);
-    setBudgets(all);
+    // 过滤掉分类已被删除的孤儿预算
+    const categories = await adapter.getAllCategories();
+    const validBudgets = all.filter(b => {
+      // 总预算（没有 categoryId 或 __total__）保留
+      if (!b.categoryId || b.categoryId === '__total__') return true;
+      // 分类预算：检查分类是否存在
+      return categories.some(c => c.id === b.categoryId);
+    });
+    setBudgets(validBudgets);
     setLoading(false);
   }, [currentMonth, adapter]);
 

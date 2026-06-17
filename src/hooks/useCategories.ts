@@ -52,6 +52,8 @@ export function useCategories(adapter: IAdapter = DexieAdapter) {
     if (count > 0) {
       throw new Error(`该分类下有 ${count} 条记录，请先迁移`);
     }
+    // 同步删除关联的预算记录
+    await adapter.deleteBudgetsByCategory(id);
     await adapter.deleteCategory(id);
     await load();
   }, [load, adapter]);

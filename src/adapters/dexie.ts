@@ -114,6 +114,11 @@ export const DexieAdapter: IAdapter = {
     await db.budgets.delete(id);
   },
 
+  async deleteBudgetsByCategory(categoryId: string) {
+    const targets = await db.budgets.where('categoryId').equals(categoryId).toArray();
+    await db.budgets.bulkDelete(targets.map(b => b.id));
+  },
+
   // —— Settings ——
   async getSetting(key: string) {
     const row = await db.settings.get(key);

@@ -21,6 +21,7 @@ function createMockAdapter(overrides: Partial<IAdapter> = {}): IAdapter {
     getAllBudgets: vi.fn(() => Promise.resolve([])),
     setBudget: vi.fn(() => Promise.resolve()),
     deleteBudget: vi.fn(() => Promise.resolve()),
+    deleteBudgetsByCategory: vi.fn(() => Promise.resolve()),
     getSetting: vi.fn(() => Promise.resolve(null)),
     setSetting: vi.fn(() => Promise.resolve()),
     seedDefaultCategories: vi.fn(() => Promise.resolve()),
@@ -75,6 +76,9 @@ describe('useBudget', () => {
       { id: 'b2', categoryId: 'cat_food', month: '2026-06', amount: 200000 },
     ];
     (adapter.getAllBudgets as any).mockResolvedValue(budgets);
+    (adapter.getAllCategories as any).mockResolvedValue([
+      { id: 'cat_food', name: '餐饮', type: 'expense', icon: '🍜', order: 1 },
+    ]);
 
     const { result } = renderHook(() => useBudget('2026-06', adapter));
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -105,6 +109,9 @@ describe('useBudget', () => {
   it('removeBudget 删除已有预算后重新加载', async () => {
     const budget = { id: 'b1', categoryId: 'cat_food', month: '2026-06', amount: 200000 };
     (adapter.getAllBudgets as any).mockResolvedValue([budget]);
+    (adapter.getAllCategories as any).mockResolvedValue([
+      { id: 'cat_food', name: '餐饮', type: 'expense', icon: '🍜', order: 1 },
+    ]);
 
     const { result } = renderHook(() => useBudget('2026-06', adapter));
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -209,6 +216,10 @@ describe('useBudget', () => {
       (adapter.getAllBudgets as any).mockResolvedValue([
         { id: 'b2', categoryId: 'cat_food', month: '2026-06', amount: 50000 },
       ]);
+      (adapter.getAllCategories as any).mockResolvedValue([
+        { id: 'cat_food', name: '餐饮', type: 'expense', icon: '🍜', order: 1 },
+        { id: 'cat_sub_takeout', name: '外卖', type: 'expense', icon: '🥡', order: 1, parentId: 'cat_food' },
+      ]);
       (adapter.getTransactionsByMonth as any).mockResolvedValue([
         { id: '1', type: 'expense', amount: 30000, categoryId: 'cat_food', paymentMethod: 'wechat', date: '2026-06-15', createdAt: 1 },
         { id: '2', type: 'expense', amount: 25000, categoryId: 'cat_sub_takeout', paymentMethod: 'wechat', date: '2026-06-16', createdAt: 2 },
@@ -245,6 +256,9 @@ describe('useBudget', () => {
       (adapter.getAllBudgets as any).mockResolvedValue([
         { id: 'b1', categoryId: '__total__', month: '2026-06', amount: 100000 },
         { id: 'b2', categoryId: 'cat_food', month: '2026-06', amount: 50000 },
+      ]);
+      (adapter.getAllCategories as any).mockResolvedValue([
+        { id: 'cat_food', name: '餐饮', type: 'expense', icon: '🍜', order: 1 },
       ]);
       (adapter.getTransactionsByMonth as any).mockResolvedValue([
         { id: '1', type: 'expense', amount: 85000, categoryId: 'cat_food', paymentMethod: 'wechat', date: '2026-06-15', createdAt: 1 },
