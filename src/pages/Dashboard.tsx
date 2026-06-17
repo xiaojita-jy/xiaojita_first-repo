@@ -77,9 +77,7 @@ export default function Dashboard() {
         </div>
         <div className="card p-3 text-center">
           <p className="text-xs text-gray-400 mb-1">月度结余</p>
-          <p className={`text-2xl font-bold font-mono tabular-nums ${
-            totals.balance > 0 ? 'text-gradient-positive' : totals.balance < 0 ? 'text-gradient-negative' : 'text-gradient-neutral'
-          }`}>
+          <p className="text-lg font-bold text-ink font-mono tabular-nums">
             {formatAmount(totals.balance)}
           </p>
         </div>

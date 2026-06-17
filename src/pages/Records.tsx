@@ -21,7 +21,7 @@ export default function Records() {
 
   // 筛选
   const [typeFilter, setTypeFilter] = useState<'all' | 'expense' | 'income'>('all');
-  const [filterCategories, setFilterCategories] = useState<Set<string>>(new Set());
+  const [filterCategory, setFilterCategory] = useState<string>('');
   const [filterPayment, setFilterPayment] = useState<PaymentMethod | ''>('');
 
   // URL 参数（日历跳转来的按日筛选）
@@ -43,15 +43,15 @@ export default function Records() {
   const { checkAlerts } = useBudget();
 
   // 筛选逻辑
-  const hasActiveFilters = typeFilter !== 'all' || filterCategories.size > 0 || filterPayment !== '';
+  const hasActiveFilters = typeFilter !== 'all' || filterCategory !== '' || filterPayment !== '';
 
   const filtered = (() => {
     let result = transactions.filter(tx => {
       if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
-      if (filterCategories.size > 0) {
+      if (filterCategory) {
         const cat = getById(tx.categoryId);
         const parentId = cat?.parentId ?? tx.categoryId;
-        if (!filterCategories.has(tx.categoryId) && !filterCategories.has(parentId)) {
+        if (tx.categoryId !== filterCategory && parentId !== filterCategory) {
           return false;
         }
       }
@@ -72,15 +72,6 @@ export default function Records() {
     PAYMENT_METHODS.find(p => p.value === method)?.label ?? method;
 
   // 操作函数
-  const toggleCategory = (id: string) => {
-    setFilterCategories(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
   const handleDelete = async () => {
     if (deleteId) {
       await remove(deleteId);
@@ -162,7 +153,7 @@ export default function Records() {
 
   return (
     <div className="px-4 py-8">
-      {/* === 第一行：标题 + 年月选择 === */}
+      {/* === 第一行：标题 + 年月/筛选下拉 === */}
       <div className="flex items-center gap-2 mb-3">
         <h1 className="text-xl font-bold text-ink">流水</h1>
         <div className="flex gap-1.5 ml-auto">
@@ -184,11 +175,47 @@ export default function Records() {
               <option key={m} value={m}>{m}月</option>
             ))}
           </select>
+          {!filterDate && (
+            <>
+              <select
+                value={typeFilter}
+                onChange={e => setTypeFilter(e.target.value as 'all' | 'expense' | 'income')}
+                className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+              >
+                <option value="all">全部类型</option>
+                <option value="expense">💰 支出</option>
+                <option value="income">💵 收入</option>
+              </select>
+              <select
+                value={filterCategory}
+                onChange={e => setFilterCategory(e.target.value)}
+                className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+              >
+                <option value="">全部分类</option>
+                {categories
+                  .filter(c => !c.parentId)
+                  .sort((a, b) => a.order - b.order)
+                  .map(c => (
+                    <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
+                  ))}
+              </select>
+              <select
+                value={filterPayment}
+                onChange={e => setFilterPayment(e.target.value as PaymentMethod | '')}
+                className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+              >
+                <option value="">全部方式</option>
+                {PAYMENT_METHODS.map(pm => (
+                  <option key={pm.value} value={pm.value}>{pm.label}</option>
+                ))}
+              </select>
+            </>
+          )}
         </div>
       </div>
 
       {/* 日历跳转日期提示 */}
-      {filterDate ? (
+      {filterDate && (
         <div className="flex items-center gap-2 mb-3">
           <span className="text-sm font-medium text-ink ml-auto">
             {formatDateShort(filterDate)} {getDayOfWeek(filterDate)}
@@ -200,78 +227,6 @@ export default function Records() {
             ← 返回整月
           </button>
         </div>
-      ) : (
-        <>
-          {/* === 第二行：类型切换 + 支付方式 === */}
-          <div className="flex items-center gap-2 mb-3">
-            <div className="flex bg-[#f0ece6] rounded-lg p-0.5">
-              {(['all', 'expense', 'income'] as const).map(t => (
-                <button
-                  key={t}
-                  onClick={() => setTypeFilter(t)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
-                    typeFilter === t ? 'bg-white text-ink shadow-sm' : 'text-gray-400'
-                  }`}
-                >
-                  {t === 'all' ? '全部' : t === 'expense' ? '💰 支出' : '💵 收入'}
-                </button>
-              ))}
-            </div>
-            <select
-              value={filterPayment}
-              onChange={e => setFilterPayment(e.target.value as PaymentMethod | '')}
-              className="px-3 py-1.5 rounded-lg border border-border text-sm bg-white text-ink ml-auto"
-            >
-              <option value="">全部方式</option>
-              {PAYMENT_METHODS.map(pm => (
-                <option key={pm.value} value={pm.value}>{pm.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* === 第三行：分类标签 === */}
-          <div className="flex gap-1.5 flex-wrap items-center mb-3">
-            {categories
-              .filter(c => !c.parentId && c.type === 'expense')
-              .map(c => {
-                const active = filterCategories.has(c.id);
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => toggleCategory(c.id)}
-                    className={`px-2.5 py-1 rounded-full text-xs transition-colors cursor-pointer ${
-                      active
-                        ? 'text-white'
-                        : 'bg-[#f0ece6] text-gray-500 hover:bg-gray-200'
-                    }`}
-                    style={active ? { backgroundColor: c.color || '#3b82f6' } : undefined}
-                  >
-                    {c.icon} {c.name}
-                  </button>
-                );
-              })}
-            <span className="text-gray-300 text-xs mx-0.5">|</span>
-            {categories
-              .filter(c => c.type === 'income' && !c.parentId)
-              .map(c => {
-                const active = filterCategories.has(c.id);
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => toggleCategory(c.id)}
-                    className={`px-2.5 py-1 rounded-full text-xs transition-colors cursor-pointer ${
-                      active
-                        ? 'text-white'
-                        : 'bg-[#f0ece6] text-gray-500 hover:bg-gray-200'
-                    }`}
-                    style={active ? { backgroundColor: c.color || '#22c55e' } : undefined}
-                  >
-                    {c.icon} {c.name}
-                  </button>
-                );
-              })}
-          </div>
-        </>
       )}
 
       {/* === 汇总栏 === */}
@@ -312,7 +267,9 @@ export default function Records() {
                 <div className="space-y-1.5">
                   {txs.map(tx => {
                     const cat = getById(tx.categoryId);
-                    const subCat = tx.subCategoryId ? getById(tx.subCategoryId) : null;
+                    const isSubCat = cat?.parentId != null;
+                    const displayCat = isSubCat ? getById(cat!.parentId!) : cat;
+                    const subCat = isSubCat ? cat : (tx.subCategoryId ? getById(tx.subCategoryId) : null);
                     const isEditing = editing?.id === tx.id;
                     return isEditing ? (
                       <div key={tx.id} className="bg-blue-50/50 rounded-xl p-3 border border-blue-200">
@@ -383,10 +340,10 @@ export default function Records() {
                     ) : (
                       <div key={tx.id} className="card px-3 py-2.5 flex items-center justify-between">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-lg flex-shrink-0">{cat?.icon || '📌'}</span>
+                          <span className="text-lg flex-shrink-0">{displayCat?.icon || '📌'}</span>
                           <div className="min-w-0">
                             <p className="text-sm text-ink truncate">
-                              {cat?.name || '未知'}
+                              {displayCat?.name || '未知'}
                               {subCat && <span className="text-gray-400"> · {subCat.name}</span>}
                             </p>
                             {tx.note && <p className="text-xs text-gray-400 truncate">{tx.note}</p>}
