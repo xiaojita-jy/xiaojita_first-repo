@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AddRecord = lazy(() => import('./pages/AddRecord'));
+const Calendar = lazy(() => import('./pages/Calendar'));
 const Records = lazy(() => import('./pages/Records'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Budget = lazy(() => import('./pages/Budget'));
@@ -34,6 +35,14 @@ export default function App() {
           element={
             <Suspense fallback={<Loading />}>
               <AddRecord />
+            </Suspense>
+          }
+        />
+        <Route
+          path="calendar"
+          element={
+            <Suspense fallback={<Loading />}>
+              <Calendar />
             </Suspense>
           }
         />

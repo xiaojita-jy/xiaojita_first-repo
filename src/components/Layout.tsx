@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 const tabs = [
   { to: '/', label: '概览', icon: '📊' },
   { to: '/add', label: '记账', icon: '➕' },
+  { to: '/calendar', label: '日历', icon: '📅' },
   { to: '/records', label: '流水', icon: '📋' },
   { to: '/reports', label: '报表', icon: '📈' },
   { to: '/settings', label: '我的', icon: '⚙️' },
