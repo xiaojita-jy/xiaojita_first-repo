@@ -7,6 +7,8 @@ import { PAYMENT_METHODS, type PaymentMethod } from '../models';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import type { Transaction } from '../models';
+import { useBudget } from '../hooks/useBudget';
+import { showToast } from '../utils/toast';
 
 const CURRENT_YEAR = new Date().getFullYear();
 const CURRENT_MONTH = new Date().getMonth() + 1;
@@ -38,6 +40,7 @@ export default function Records() {
   const queryMonthActual = filterDate ? filterDate.slice(0, 7) : queryMonth;
   const { transactions, loading, remove, update } = useTransactions(queryMonthActual);
   const { categories, getById } = useCategories();
+  const { checkAlerts } = useBudget();
 
   // 筛选逻辑
   const hasActiveFilters = typeFilter !== 'all' || filterCategories.size > 0 || filterPayment !== '';
@@ -119,6 +122,22 @@ export default function Records() {
       note: editing.note || undefined,
     });
     setEditing(null);
+
+    // 预算超支检查（只对支出类编辑做检查）
+    if (editing.type === 'expense') {
+      try {
+        const alerts = await checkAlerts(categories);
+        for (const alert of alerts) {
+          if (alert.level === 'danger') {
+            showToast(`🔴 「${alert.categoryName}」已超支 ${formatAmount(Math.abs(alert.remaining))}`, 'danger');
+          } else {
+            showToast(`⚠️ 「${alert.categoryName}」预算已用 ${alert.percentage}%，剩 ${formatAmount(alert.remaining)}`, 'warning');
+          }
+        }
+      } catch {
+        // 预算检查失败不影响主流程
+      }
+    }
   };
 
   // 按日期分组
