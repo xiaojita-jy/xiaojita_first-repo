@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCategories } from '../hooks/useCategories';
 import { exportBackup, importBackup } from '../utils/backup';
+import { exportCSV } from '../utils/csv';
 import { formatBackupTime, generateId } from '../utils/format';
 import ConfirmDialog from '../components/ConfirmDialog';
 import CategoryForm from '../components/CategoryForm';
@@ -94,6 +95,15 @@ export default function Settings() {
       setImportMsg('导出成功');
     } catch {
       setImportMsg('导出失败，请重试');
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      await exportCSV();
+      setImportMsg('CSV 导出成功');
+    } catch {
+      setImportMsg('CSV 导出失败，请重试');
     }
   };
 
@@ -223,6 +233,9 @@ export default function Settings() {
         <div className="flex gap-3">
           <button onClick={handleExport} className="flex-1 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-medium">📤 导出备份</button>
           <button onClick={() => setShowImportConfirm(true)} className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium">📥 恢复备份</button>
+        </div>
+        <div className="mt-2">
+          <button onClick={handleExportCSV} className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium">📊 导出 CSV</button>
         </div>
       </div>
 
