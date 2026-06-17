@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import ToastContainer from './Toast';
 
 const tabs = [
   { to: '/', label: '概览', icon: '📊' },
@@ -12,6 +13,7 @@ const tabs = [
 export default function Layout() {
   return (
     <div className="min-h-screen pb-16 bg-paper">
+      <ToastContainer />
       <main className="max-w-lg mx-auto">
         <Outlet />
       </main>
