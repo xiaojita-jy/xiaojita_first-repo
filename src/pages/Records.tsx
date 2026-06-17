@@ -374,7 +374,7 @@ export default function Records() {
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <div className="text-right">
                             <span className={`text-sm font-semibold font-mono tabular-nums ${tx.type === 'expense' ? 'text-expense' : 'text-income'}`}>
-                              {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}
+                                                          {formatAmount(tx.amount)}
                             </span>
                             <span className="block text-[10px] text-gray-400">{getPaymentLabel(tx.paymentMethod)}</span>
                           </div>

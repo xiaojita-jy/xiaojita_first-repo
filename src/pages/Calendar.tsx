@@ -116,12 +116,12 @@ export default function Calendar() {
                 <div className="flex-1 flex flex-col justify-center items-center mt-0.5 space-y-0.5">
                   {summary.income > 0 && (
                     <span className="text-income text-[10px] leading-tight font-mono tabular-nums">
-                      +{formatAmount(summary.income)}
+                      {formatAmount(summary.income)}
                     </span>
                   )}
                   {summary.expense > 0 && (
                     <span className="text-expense text-[10px] leading-tight font-mono tabular-nums">
-                      -{formatAmount(summary.expense)}
+                      {formatAmount(summary.expense)}
                     </span>
                   )}
                 </div>

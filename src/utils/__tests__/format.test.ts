@@ -26,7 +26,7 @@ describe('formatAmount', () => {
   it('0 分 → ¥0.00', () => expect(formatAmount(0)).toBe('¥0.00'));
   it('10000 分 → ¥100.00', () => expect(formatAmount(10000)).toBe('¥100.00'));
   it('123456 分 → ¥1,234.56', () => expect(formatAmount(123456)).toBe('¥1,234.56'));
-  it('-500 分 → -¥5.00', () => expect(formatAmount(-500)).toBe('-¥5.00'));
+  it('-500 分 → ¥5.00（不输出负号，靠颜色区分）', () => expect(formatAmount(-500)).toBe('¥5.00'));
   it('1 分 → ¥0.01', () => expect(formatAmount(1)).toBe('¥0.01'));
   it('1000500 分 → ¥10,005.00', () => expect(formatAmount(1000500)).toBe('¥10,005.00'));
 });
