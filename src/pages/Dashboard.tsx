@@ -200,7 +200,12 @@ export default function Dashboard() {
             return (
               <div key={b.id} className="mb-3 last:mb-0">
                 <div className="flex justify-between text-xs mb-1">
-                  <span>{cat?.icon} {cat?.name || '未知'}</span>
+                  <span>
+                    {cat?.color && (
+                      <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle" style={{ backgroundColor: cat.color }} />
+                    )}
+                    {cat?.icon} {cat?.name || '未知'}
+                  </span>
                   <span className={remaining < 0 ? 'text-red-500 font-medium' : 'text-gray-500'}>
                     {remaining >= 0 ? `剩 ${formatAmount(remaining)}` : `超 ${formatAmount(Math.abs(remaining))}`}
                   </span>
