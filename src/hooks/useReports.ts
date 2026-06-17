@@ -8,6 +8,7 @@ export interface CategorySummary {
   categoryId: string;
   categoryName: string;
   icon: string;
+  color?: string;
   amount: number;
   percentage: number;
   subCategories?: CategorySummary[];
@@ -75,6 +76,7 @@ export function useReports(adapter: IAdapter = DexieAdapter) {
           categoryId: sub.id,
           categoryName: sub.name,
           icon: sub.icon,
+          color: sub.color,
           amount: subAmount,
           percentage: totalExpense > 0 ? Math.round((subAmount / totalExpense) * 100) : 0,
         };
@@ -84,6 +86,7 @@ export function useReports(adapter: IAdapter = DexieAdapter) {
         categoryId: cat.id,
         categoryName: cat.name,
         icon: cat.icon,
+        color: cat.color,
         amount,
         percentage: totalExpense > 0 ? Math.round((amount / totalExpense) * 100) : 0,
         subCategories: subSummaries.length > 0 ? subSummaries : undefined,
