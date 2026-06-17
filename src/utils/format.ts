@@ -127,7 +127,8 @@ export function getCalendarDays(year: number, month: number): CalendarDay[] {
   const endOffset = lastDay.getDay() === 0 ? 6 : lastDay.getDay() - 1;
 
   const totalDays = lastDay.getDate();
-  const totalCells = startOffset + totalDays + (6 - endOffset);
+  let totalCells = startOffset + totalDays + (6 - endOffset);
+  if (totalCells < 35) totalCells = 35;
 
   const days: CalendarDay[] = [];
   // 起始日期 = 当月1号 - startOffset 天

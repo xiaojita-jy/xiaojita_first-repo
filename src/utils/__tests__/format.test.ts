@@ -141,14 +141,33 @@ describe('getCalendarDays', () => {
     expect(days).toHaveLength(35);
   });
 
-  it('2026-07 返回 35 天（5 周，7月1日是周三）', () => {
+  it('2026-07 返回 35 天（5 周，7月1日是周三，首格为周一6月29日）', () => {
     const days = getCalendarDays(2026, 7);
     expect(days).toHaveLength(35);
+    // 7月1日是周三，offset=2，第一格应为周一 6月29日
+    expect(days[0].date).toBe('2026-06-29');
+    expect(days[0].isCurrentMonth).toBe(false);
+    expect(days[2].date).toBe('2026-07-01');
+    expect(days[2].isCurrentMonth).toBe(true);
   });
 
   it('2026-03 返回 42 天（6 周，3月1日是周日）', () => {
     const days = getCalendarDays(2026, 3);
     expect(days).toHaveLength(42);
+  });
+
+  it('2027-02 返回 35 天（28天非闰年，2月1日周一，需强制补足至35格）', () => {
+    const days = getCalendarDays(2027, 2);
+    // Feb 2027: 1st is Monday (offset=0), 28th is Sunday (endOffset=6)
+    // Raw: 0 + 28 + 0 = 28 → enforced to 35
+    expect(days).toHaveLength(35);
+    expect(days[0].date).toBe('2027-02-01');
+    expect(days[0].isCurrentMonth).toBe(true);
+    // 后7格应为3月1-7日（补足到35格）
+    const trailing = days.slice(28);
+    trailing.forEach(d => expect(d.isCurrentMonth).toBe(false));
+    expect(trailing[0].date).toBe('2027-03-01');
+    expect(trailing[6].date).toBe('2027-03-07');
   });
 
   it('第一天是当月的 1 号', () => {
