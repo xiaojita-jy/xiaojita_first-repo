@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { DexieAdapter } from '../adapters/dexie';
-import { getPastMonths } from '../utils/format';
+import { getPastMonths, getPastMonthsFrom } from '../utils/format';
 import type { Transaction } from '../models';
 import type { IAdapter } from '../adapters/types';
 
@@ -31,8 +31,8 @@ export interface Anomaly {
 export function useReports(adapter: IAdapter = DexieAdapter) {
   const [monthlySummaries, setMonthlySummaries] = useState<MonthlySummary[]>([]);
 
-  const loadMonthlySummaries = useCallback(async () => {
-    const months = getPastMonths(6);
+  const loadMonthlySummaries = useCallback(async (endMonth?: string) => {
+    const months = endMonth ? getPastMonthsFrom(endMonth, 6) : getPastMonths(6);
     const summaries: MonthlySummary[] = [];
     for (const month of months) {
       const txs = await adapter.getTransactionsByMonth(month);
@@ -133,5 +133,5 @@ export function useReports(adapter: IAdapter = DexieAdapter) {
     return anomalies.sort((a, b) => b.deviation - a.deviation);
   }, [adapter]);
 
-  return { monthlySummaries, getCategoryBreakdown, getSubCategoryTransactions, getAnomalies, reload: loadMonthlySummaries };
+  return { monthlySummaries, loadMonthlySummaries, getCategoryBreakdown, getSubCategoryTransactions, getAnomalies, reload: loadMonthlySummaries };
 }

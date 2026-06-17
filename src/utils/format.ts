@@ -97,6 +97,34 @@ export function getPastMonths(n: number): string[] {
 }
 
 /**
+ * 获取以 endMonth 为截止的过去 N 个月
+ * endMonth 格式: "YYYY-MM"
+ */
+export function getPastMonthsFrom(endMonth: string, n: number): string[] {
+  const [y, m] = endMonth.split('-').map(Number);
+  const months: string[] = [];
+  for (let i = 0; i < n; i++) {
+    const d = new Date(y, m - 1 - i, 1);
+    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  }
+  return months;
+}
+
+/** 年份下拉选项（当年±2，共9年） */
+export function getYearOptions(): number[] {
+  const currentYear = new Date().getFullYear();
+  return Array.from({ length: 9 }, (_, i) => currentYear - 2 + i);
+}
+
+/** 月份下拉选项（当年只到当前月份） */
+export function getMonthOptions(year: number): number[] {
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+  const maxMonth = year === currentYear ? currentMonth : 12;
+  return Array.from({ length: maxMonth }, (_, i) => i + 1);
+}
+
+/**
  * 日期 → 周几（中文）
  */
 export function getDayOfWeek(dateStr: string): string {

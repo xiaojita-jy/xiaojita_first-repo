@@ -1,7 +1,10 @@
-import { useEffect, useState, Suspense, lazy } from 'react';
+import { useEffect, useState, Suspense, lazy, useMemo } from 'react';
 import { useReports, type CategorySummary, type Anomaly } from '../hooks/useReports';
-import { formatAmount, getCurrentMonth, getPastMonths, formatMonth } from '../utils/format';
+import { formatAmount, getYearOptions, getMonthOptions } from '../utils/format';
 import type { Transaction } from '../models';
+
+const CURRENT_YEAR = new Date().getFullYear();
+const CURRENT_MONTH = new Date().getMonth() + 1;
 
 const Charts = lazy(() => import('../components/Charts'));
 
@@ -14,8 +17,11 @@ function ChartFallback() {
 }
 
 export default function Reports() {
-  const [month, setMonth] = useState(getCurrentMonth());
-  const { monthlySummaries, getCategoryBreakdown, getSubCategoryTransactions, getAnomalies } = useReports();
+  const [year, setYear] = useState(CURRENT_YEAR);
+  const [month, setMonth] = useState(CURRENT_MONTH);
+  const queryMonth = `${year}-${String(month).padStart(2, '0')}`;
+
+  const { monthlySummaries, loadMonthlySummaries, getCategoryBreakdown, getSubCategoryTransactions, getAnomalies } = useReports();
   const [breakdown, setBreakdown] = useState<CategorySummary[]>([]);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,26 +30,36 @@ export default function Reports() {
   const [subTxs, setSubTxs] = useState<Transaction[]>([]);
   const [subLoading, setSubLoading] = useState(false);
 
+  // 年份变化时，如果月份超出当年可用范围则自动调整
+  const yearOptions = useMemo(() => getYearOptions(), []);
+  const monthOptions = useMemo(() => getMonthOptions(year), [year]);
+  const handleYearChange = (y: number) => {
+    setYear(y);
+    const maxMonth = getMonthOptions(y).length;
+    if (month > maxMonth) setMonth(maxMonth);
+  };
+
+  // 加载分类 breakdown + 异常 + 趋势
   useEffect(() => {
     setLoading(true);
     setDrilldownId(null);
     setSubDrilldownId(null);
+    loadMonthlySummaries(queryMonth);
     Promise.all([
-      getCategoryBreakdown(month).then(setBreakdown),
-      getAnomalies(month).then(setAnomalies),
+      getCategoryBreakdown(queryMonth).then(setBreakdown),
+      getAnomalies(queryMonth).then(setAnomalies),
     ]).finally(() => setLoading(false));
-  }, [month, getCategoryBreakdown, getAnomalies]);
+  }, [queryMonth, getCategoryBreakdown, getAnomalies, loadMonthlySummaries]);
 
   useEffect(() => {
     if (!subDrilldownId) { setSubTxs([]); return; }
     setSubLoading(true);
-    getSubCategoryTransactions(subDrilldownId, month).then(txs => {
+    getSubCategoryTransactions(subDrilldownId, queryMonth).then(txs => {
       setSubTxs(txs);
       setSubLoading(false);
     });
-  }, [subDrilldownId, month, getSubCategoryTransactions]);
+  }, [subDrilldownId, queryMonth, getSubCategoryTransactions]);
 
-  const months = getPastMonths(12);
   const trendData = [...monthlySummaries].reverse().map(s => ({
     month: s.month.slice(5),
     支出: s.expense / 100,
@@ -60,7 +76,7 @@ export default function Reports() {
   const subDrilldownCategory = drilldownCategory?.subCategories?.find(s => s.categoryId === subDrilldownId) ?? null;
 
   const currentExpense = breakdown.reduce((s, b) => s + b.amount, 0);
-  const currentMonthSummary = monthlySummaries.find(s => s.month === month);
+  const currentMonthSummary = monthlySummaries.find(s => s.month === queryMonth);
   const currentIncome = currentMonthSummary?.income ?? 0;
 
   if (loading) {
@@ -69,17 +85,30 @@ export default function Reports() {
 
   return (
     <div className="px-4 py-8">
-      <h1 className="text-xl font-bold text-ink mb-6">报表</h1>
-
-      <select
-        value={month}
-        onChange={e => setMonth(e.target.value)}
-        className="px-3 py-1.5 rounded-lg border border-border text-sm bg-white text-ink mb-5"
-      >
-        {months.map(m => (
-          <option key={m} value={m}>{formatMonth(m)}</option>
-        ))}
-      </select>
+      {/* 标题 + 年份/月份选择器 */}
+      <div className="flex items-center gap-2 mb-6">
+        <h1 className="text-xl font-bold text-ink">报表</h1>
+        <div className="flex gap-1.5 ml-auto">
+          <select
+            value={year}
+            onChange={e => handleYearChange(Number(e.target.value))}
+            className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+          >
+            {yearOptions.map(y => (
+              <option key={y} value={y}>{y}年</option>
+            ))}
+          </select>
+          <select
+            value={month}
+            onChange={e => setMonth(Number(e.target.value))}
+            className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+          >
+            {monthOptions.map(m => (
+              <option key={m} value={m}>{m}月</option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       {/* Monthly summary — renders immediately */}
       <div className="card p-4 mb-4">
@@ -90,7 +119,7 @@ export default function Reports() {
             <p className="text-lg font-bold text-expense font-mono tabular-nums">{formatAmount(currentExpense)}</p>
             {(() => {
               const lastMonth = monthlySummaries.find(s => {
-                const [y, m] = month.split('-').map(Number);
+                const [y, m] = queryMonth.split('-').map(Number);
                 const last = new Date(y, m - 2, 1);
                 const lm = `${last.getFullYear()}-${String(last.getMonth() + 1).padStart(2, '0')}`;
                 return s.month === lm;
@@ -111,7 +140,7 @@ export default function Reports() {
             <p className="text-lg font-bold text-income font-mono tabular-nums">{formatAmount(currentIncome)}</p>
             {(() => {
               const lastMonth = monthlySummaries.find(s => {
-                const [y, m] = month.split('-').map(Number);
+                const [y, m] = queryMonth.split('-').map(Number);
                 const last = new Date(y, m - 2, 1);
                 const lm = `${last.getFullYear()}-${String(last.getMonth() + 1).padStart(2, '0')}`;
                 return s.month === lm;
