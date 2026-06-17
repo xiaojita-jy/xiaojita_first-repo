@@ -31,6 +31,7 @@ export interface Category {
   name: string;
   type: 'expense' | 'income';
   icon: string;
+  color?: string;            // hex color e.g. '#3B82F6', optional for backward compat
   order: number;
   parentId?: string;
 }
