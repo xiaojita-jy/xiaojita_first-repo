@@ -6,11 +6,11 @@ export function centsToYuan(cents: number): number {
 }
 
 /**
- * 分 → 显示字符串（¥1,234.56）
+ * 分 → 显示字符串（1234.56）
  */
 export function formatAmount(cents: number): string {
   const yuan = Math.abs(cents) / 100;
-  return `¥${yuan.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return yuan.toFixed(2);
 }
 
 /**

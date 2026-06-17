@@ -110,7 +110,7 @@ export default function Charts({
                       <Cell key={i} fill={item.color || COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => `¥${Number(value).toFixed(2)}`} />
+                  <Tooltip formatter={(value) => Number(value).toFixed(2)} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
@@ -140,7 +140,7 @@ export default function Charts({
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="month" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip formatter={(value) => `¥${Number(value).toFixed(2)}`} />
+              <Tooltip formatter={(value) => Number(value).toFixed(2)} />
               <Line type="monotone" dataKey="支出" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
               <Line type="monotone" dataKey="收入" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>

@@ -14,7 +14,6 @@ export default function AmountInput({ value, onChange }: Props) {
         className="text-4xl font-bold text-ink font-mono tabular-nums flex items-center justify-center"
         onClick={() => inputRef.current?.focus()}
       >
-        <span className="text-2xl mr-1">¥</span>
         <span className={value ? '' : 'text-gray-300'}>
           {value || '0.00'}
         </span>
