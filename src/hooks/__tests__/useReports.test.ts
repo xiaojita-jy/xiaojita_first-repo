@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import type { IAdapter } from '../../adapters/types';
+import type { CategorySummary, Anomaly } from '../useReports';
 
 function createMockAdapter(overrides: Partial<IAdapter> = {}): IAdapter {
   return {
@@ -66,7 +67,7 @@ describe('useReports', () => {
 
     const { result } = renderHook(() => useReports(adapter));
 
-    let breakdown: any;
+    let breakdown: CategorySummary[] = [];
     await act(async () => {
       breakdown = await result.current.getCategoryBreakdown('2026-06');
     });
@@ -85,7 +86,7 @@ describe('useReports', () => {
 
     const { result } = renderHook(() => useReports(adapter));
 
-    let breakdown: any;
+    let breakdown: CategorySummary[] = [];
     await act(async () => {
       breakdown = await result.current.getCategoryBreakdown('2026-06');
     });
@@ -122,7 +123,7 @@ describe('useReports', () => {
 
     const { result } = renderHook(() => useReports(adapter));
 
-    let anomalies: any;
+    let anomalies: Anomaly[] = [];
     await act(async () => {
       anomalies = await result.current.getAnomalies('2026-06');
     });
@@ -150,7 +151,7 @@ describe('useReports', () => {
 
     const { result } = renderHook(() => useReports(adapter));
 
-    let anomalies: any;
+    let anomalies: Anomaly[] = [];
     await act(async () => {
       anomalies = await result.current.getAnomalies('2026-06');
     });
@@ -169,7 +170,7 @@ describe('useReports', () => {
 
     const { result } = renderHook(() => useReports(adapter));
 
-    let anomalies: any;
+    let anomalies: Anomaly[] = [];
     await act(async () => {
       anomalies = await result.current.getAnomalies('2026-06');
     });
