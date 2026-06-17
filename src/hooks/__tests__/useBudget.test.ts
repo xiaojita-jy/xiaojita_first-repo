@@ -160,4 +160,102 @@ describe('useBudget', () => {
       percentage: 40,
     });
   });
+
+  describe('checkAlerts', () => {
+    const categories = [
+      { id: 'cat_food', name: '餐饮', type: 'expense' as const, icon: '🍜', order: 1 },
+      { id: 'cat_transport', name: '交通', type: 'expense' as const, icon: '🚗', order: 2 },
+      { id: 'cat_sub_takeout', name: '外卖', type: 'expense' as const, icon: '🥡', order: 1, parentId: 'cat_food' },
+    ];
+
+    it('总预算超过100%返回 danger 级别', async () => {
+      (adapter.getAllBudgets as any).mockResolvedValue([
+        { id: 'b1', categoryId: '__total__', month: '2026-06', amount: 100000 },
+      ]);
+      (adapter.getTransactionsByMonth as any).mockResolvedValue([
+        { id: '1', type: 'expense', amount: 95000, categoryId: 'cat_food', paymentMethod: 'wechat', date: '2026-06-15', createdAt: 1 },
+        { id: '2', type: 'expense', amount: 10000, categoryId: 'cat_transport', paymentMethod: 'cash', date: '2026-06-16', createdAt: 2 },
+      ]);
+
+      const { result } = renderHook(() => useBudget('2026-06', adapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      const alerts = await result.current.checkAlerts(categories);
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].level).toBe('danger');
+      expect(alerts[0].categoryId).toBeUndefined();
+      expect(alerts[0].categoryName).toBe('月度总预算');
+      expect(alerts[0].percentage).toBe(105);
+    });
+
+    it('总预算超过80%但未满100%返回 warning 级别', async () => {
+      (adapter.getAllBudgets as any).mockResolvedValue([
+        { id: 'b1', categoryId: '__total__', month: '2026-06', amount: 100000 },
+      ]);
+      (adapter.getTransactionsByMonth as any).mockResolvedValue([
+        { id: '1', type: 'expense', amount: 85000, categoryId: 'cat_food', paymentMethod: 'wechat', date: '2026-06-15', createdAt: 1 },
+      ]);
+
+      const { result } = renderHook(() => useBudget('2026-06', adapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      const alerts = await result.current.checkAlerts(categories);
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].level).toBe('warning');
+      expect(alerts[0].percentage).toBe(85);
+    });
+
+    it('分类预算包含子分类支出后超支', async () => {
+      (adapter.getAllBudgets as any).mockResolvedValue([
+        { id: 'b2', categoryId: 'cat_food', month: '2026-06', amount: 50000 },
+      ]);
+      (adapter.getTransactionsByMonth as any).mockResolvedValue([
+        { id: '1', type: 'expense', amount: 30000, categoryId: 'cat_food', paymentMethod: 'wechat', date: '2026-06-15', createdAt: 1 },
+        { id: '2', type: 'expense', amount: 25000, categoryId: 'cat_sub_takeout', paymentMethod: 'wechat', date: '2026-06-16', createdAt: 2 },
+      ]);
+
+      const { result } = renderHook(() => useBudget('2026-06', adapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      const alerts = await result.current.checkAlerts(categories);
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].level).toBe('danger');
+      expect(alerts[0].categoryId).toBe('cat_food');
+      expect(alerts[0].categoryName).toBe('餐饮');
+      expect(alerts[0].percentage).toBe(110);
+    });
+
+    it('低于80%不产生告警', async () => {
+      (adapter.getAllBudgets as any).mockResolvedValue([
+        { id: 'b1', categoryId: '__total__', month: '2026-06', amount: 100000 },
+        { id: 'b2', categoryId: 'cat_food', month: '2026-06', amount: 50000 },
+      ]);
+      (adapter.getTransactionsByMonth as any).mockResolvedValue([
+        { id: '1', type: 'expense', amount: 30000, categoryId: 'cat_food', paymentMethod: 'wechat', date: '2026-06-15', createdAt: 1 },
+      ]);
+
+      const { result } = renderHook(() => useBudget('2026-06', adapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      const alerts = await result.current.checkAlerts(categories);
+      expect(alerts).toHaveLength(0);
+    });
+
+    it('多个预算同时超阈值返回多条告警', async () => {
+      (adapter.getAllBudgets as any).mockResolvedValue([
+        { id: 'b1', categoryId: '__total__', month: '2026-06', amount: 100000 },
+        { id: 'b2', categoryId: 'cat_food', month: '2026-06', amount: 50000 },
+      ]);
+      (adapter.getTransactionsByMonth as any).mockResolvedValue([
+        { id: '1', type: 'expense', amount: 85000, categoryId: 'cat_food', paymentMethod: 'wechat', date: '2026-06-15', createdAt: 1 },
+        { id: '2', type: 'expense', amount: 20000, categoryId: 'cat_transport', paymentMethod: 'cash', date: '2026-06-16', createdAt: 2 },
+      ]);
+
+      const { result } = renderHook(() => useBudget('2026-06', adapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      const alerts = await result.current.checkAlerts(categories);
+      expect(alerts).toHaveLength(2);
+    });
+  });
 });
