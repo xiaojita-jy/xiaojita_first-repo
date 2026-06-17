@@ -52,7 +52,7 @@ export default function Settings() {
     }
   };
 
-  const handleAddCategory = async (data: { name: string; icon: string; type: 'expense' | 'income' }) => {
+  const handleAddCategory = async (data: { name: string; icon: string; type: 'expense' | 'income'; color?: string }) => {
     if (addForm?.parentId) {
       // 子分类：order 基于同级子分类
       const siblings = categories.filter(c => c.parentId === addForm.parentId);
@@ -62,6 +62,7 @@ export default function Settings() {
         name: data.name,
         type: data.type,
         icon: data.icon,
+        color: data.color,
         order: maxOrder + 1,
         parentId: addForm.parentId,
       });
@@ -74,15 +75,16 @@ export default function Settings() {
         name: data.name,
         type: data.type,
         icon: data.icon,
+        color: data.color,
         order: maxOrder + 1,
       });
     }
     setAddForm(null);
   };
 
-  const handleUpdateCategory = async (data: { name: string; icon: string; type: 'expense' | 'income' }) => {
+  const handleUpdateCategory = async (data: { name: string; icon: string; type: 'expense' | 'income'; color?: string }) => {
     if (!editingCategory) return;
-    await updateCategory(editingCategory.id, { name: data.name, icon: data.icon });
+    await updateCategory(editingCategory.id, { name: data.name, icon: data.icon, color: data.color });
     setEditingCategory(null);
   };
 
@@ -175,7 +177,12 @@ export default function Settings() {
                       <span className="text-xs text-gray-400 w-4">
                         {subs.length > 0 ? (expandedIds.has(cat.id) ? '▼' : '▶') : '　'}
                       </span>
-                      <span>{cat.icon} {cat.name}</span>
+                      <span>
+                        {cat.color && (
+                          <span className="inline-block w-2.5 h-2.5 rounded-full mr-1 align-middle" style={{ backgroundColor: cat.color }} />
+                        )}
+                        {cat.icon} {cat.name}
+                      </span>
                     </button>
                     <div className="flex gap-2">
                       <button onClick={() => setAddForm({ parentId: cat.id, type: cat.type })} className="text-xs text-green-500">+子分类</button>
@@ -210,7 +217,12 @@ export default function Settings() {
                     </div>
                   ) : (
                     <div key={sub.id} className="flex items-center justify-between py-1.5 pl-6 border-b border-gray-50">
-                      <span className="text-sm text-gray-500">{sub.icon} {sub.name}</span>
+                      <span className="text-sm text-gray-500">
+                        {sub.color && (
+                          <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle" style={{ backgroundColor: sub.color }} />
+                        )}
+                        {sub.icon} {sub.name}
+                      </span>
                       <div className="flex gap-2">
                         <button onClick={() => setEditingCategory(sub)} className="text-xs text-blue-400">编辑</button>
                         <button onClick={() => setDeleteTarget(sub.id)} className="text-xs text-red-400">删除</button>
