@@ -18,8 +18,17 @@ const MONTHS = (() => {
 
 export default function Records() {
   const [month, setMonth] = useState(getCurrentMonth());
-  const [filterCategory, setFilterCategory] = useState('');
+  const [filterCategories, setFilterCategories] = useState<Set<string>>(new Set());
   const [filterPayment, setFilterPayment] = useState<PaymentMethod | ''>('');
+
+  const toggleCategory = (id: string) => {
+    setFilterCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editing, setEditing] = useState<{
     id: string; type: 'expense' | 'income'; amount: string;
@@ -30,9 +39,12 @@ export default function Records() {
   const { categories, getById } = useCategories();
 
   const filtered = transactions.filter(tx => {
-    if (filterCategory && tx.categoryId !== filterCategory) {
+    if (filterCategories.size > 0) {
       const cat = getById(tx.categoryId);
-      if (!cat || cat.parentId !== filterCategory) return false;
+      const parentId = cat?.parentId || tx.categoryId;
+      if (!filterCategories.has(tx.categoryId) && !filterCategories.has(parentId)) {
+        return false;
+      }
     }
     if (filterPayment && tx.paymentMethod !== filterPayment) return false;
     return true;
@@ -105,18 +117,27 @@ export default function Records() {
             <option key={m} value={m}>{m}</option>
           ))}
         </select>
-        <select
-          value={filterCategory}
-          onChange={e => setFilterCategory(e.target.value)}
-          className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm bg-white"
-        >
-          <option value="">全部分类</option>
+        {/* 分类多选标签 */}
+        <div className="flex gap-1.5 flex-wrap">
           {categories
             .filter(c => !c.parentId && c.type === 'expense')
-            .map(c => (
-              <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
-            ))}
-        </select>
+            .map(c => {
+              const active = filterCategories.has(c.id);
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => toggleCategory(c.id)}
+                  className={`px-2.5 py-1 rounded-full text-xs transition-colors cursor-pointer ${
+                    active
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  }`}
+                >
+                  {c.icon} {c.name}
+                </button>
+              );
+            })}
+        </div>
         <select
           value={filterPayment}
           onChange={e => setFilterPayment(e.target.value as PaymentMethod | '')}
