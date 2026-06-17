@@ -41,7 +41,7 @@ export default function Records() {
   const filtered = transactions.filter(tx => {
     if (filterCategories.size > 0) {
       const cat = getById(tx.categoryId);
-      const parentId = cat?.parentId || tx.categoryId;
+      const parentId = cat?.parentId ?? tx.categoryId;
       if (!filterCategories.has(tx.categoryId) && !filterCategories.has(parentId)) {
         return false;
       }
