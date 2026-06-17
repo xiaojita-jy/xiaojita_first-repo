@@ -43,14 +43,14 @@ export interface Budget {
 }
 
 export interface BudgetAlert {
-  categoryId: string | undefined;  // undefined = 总预算
+  categoryId?: string;       // undefined = 总预算
   categoryName: string;
   categoryIcon: string;
   level: 'warning' | 'danger';     // 黄牌/红牌
-  budget: number;
-  spent: number;
-  remaining: number;
-  percentage: number;
+  budget: number;            // 单位：分
+  spent: number;             // 单位：分
+  remaining: number;         // 单位：分
+  percentage: number;        // 0-100 百分比
 }
 
 // ========== 默认分类 ==========
