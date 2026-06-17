@@ -19,7 +19,10 @@ export function useBudget(month?: string, adapter: IAdapter = DexieAdapter) {
   useEffect(() => { load(); }, [load]);
 
   const getBudget = useCallback(
-    (categoryId?: string) => budgets.find(b => b.categoryId === (categoryId ?? '__total__')),
+    (categoryId?: string) => budgets.find(b => {
+      const targetId = categoryId ?? '__total__';
+      return b.categoryId === targetId || (targetId === '__total__' && !b.categoryId);
+    }),
     [budgets]
   );
 
