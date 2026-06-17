@@ -42,6 +42,17 @@ export interface Budget {
   amount: number;            // 单位：分
 }
 
+export interface BudgetAlert {
+  categoryId: string | undefined;  // undefined = 总预算
+  categoryName: string;
+  categoryIcon: string;
+  level: 'warning' | 'danger';     // 黄牌/红牌
+  budget: number;
+  spent: number;
+  remaining: number;
+  percentage: number;
+}
+
 // ========== 默认分类 ==========
 
 let _catId = 0;
