@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTransactions } from '../hooks/useTransactions';
 import { useCategories } from '../hooks/useCategories';
 import { formatAmount, formatDateShort, getCurrentMonth, getDayOfWeek } from '../utils/format';
@@ -21,6 +22,9 @@ export default function Records() {
   const [filterCategories, setFilterCategories] = useState<Set<string>>(new Set());
   const [filterPayment, setFilterPayment] = useState<PaymentMethod | ''>('');
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterDate = searchParams.get('date');
+
   const toggleCategory = (id: string) => {
     setFilterCategories(prev => {
       const next = new Set(prev);
@@ -35,20 +39,28 @@ export default function Records() {
     categoryId: string; paymentMethod: PaymentMethod; date: string; note: string;
   } | null>(null);
 
-  const { transactions, loading, remove, update } = useTransactions(month);
+  const queryMonth = filterDate ? filterDate.slice(0, 7) : month;
+  const { transactions, loading, remove, update } = useTransactions(queryMonth);
   const { categories, getById } = useCategories();
 
-  const filtered = transactions.filter(tx => {
-    if (filterCategories.size > 0) {
-      const cat = getById(tx.categoryId);
-      const parentId = cat?.parentId ?? tx.categoryId;
-      if (!filterCategories.has(tx.categoryId) && !filterCategories.has(parentId)) {
-        return false;
+  const filtered = (() => {
+    let result = transactions.filter(tx => {
+      if (filterCategories.size > 0) {
+        const cat = getById(tx.categoryId);
+        const parentId = cat?.parentId ?? tx.categoryId;
+        if (!filterCategories.has(tx.categoryId) && !filterCategories.has(parentId)) {
+          return false;
+        }
       }
+      if (filterPayment && tx.paymentMethod !== filterPayment) return false;
+      return true;
+    });
+    // 按日筛选
+    if (filterDate) {
+      result = result.filter(tx => tx.date === filterDate);
     }
-    if (filterPayment && tx.paymentMethod !== filterPayment) return false;
-    return true;
-  });
+    return result;
+  })();
 
   const expenseTotal = filtered
     .filter(t => t.type === 'expense')
@@ -107,7 +119,22 @@ export default function Records() {
     <div className="px-4 py-8">
       <h1 className="text-xl font-bold text-ink mb-6">流水</h1>
 
-      <div className="flex gap-2 mb-5 flex-wrap">
+      {filterDate ? (
+        <div className="flex items-center gap-2 mb-5">
+          <span className="text-sm font-medium text-ink ml-auto">
+            {formatDateShort(filterDate)} {getDayOfWeek(filterDate)}
+          </span>
+          <button
+            onClick={() => setSearchParams({})}
+            className="text-xs text-blue-500 cursor-pointer"
+          >
+            ← 返回整月
+          </button>
+        </div>
+      ) : null}
+
+      {!filterDate && (
+        <div className="flex gap-2 mb-5 flex-wrap">
         <select
           value={month}
           onChange={e => setMonth(e.target.value)}
@@ -152,6 +179,7 @@ export default function Records() {
           <option value="other">其他</option>
         </select>
       </div>
+      )}
 
       <div className="flex justify-between text-sm mb-3 px-1">
         <span className="text-expense font-mono tabular-nums">支出 {formatAmount(expenseTotal)}</span>
