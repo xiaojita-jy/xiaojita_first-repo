@@ -273,4 +273,84 @@ describe('useBudget', () => {
       expect(alerts).toHaveLength(2);
     });
   });
+
+  describe('getBudgetHistory', () => {
+    it('返回按月份排序的预算执行率数据', async () => {
+      const budgetsInRange = [
+        { id: 'b1', categoryId: '__total__', month: '2026-04', amount: 500000 },
+        { id: 'b2', categoryId: 'cat_food', month: '2026-04', amount: 200000 },
+        { id: 'b3', categoryId: '__total__', month: '2026-05', amount: 500000 },
+        { id: 'b4', categoryId: 'cat_food', month: '2026-05', amount: 150000 },
+      ];
+      (adapter.getBudgetsInRange as any).mockResolvedValue(budgetsInRange);
+      (adapter.getAllCategories as any).mockResolvedValue([
+        { id: 'cat_food', name: '餐饮', type: 'expense', icon: '🍜', order: 1, color: '#ef4444' },
+        { id: 'cat_sub_takeout', name: '外卖', type: 'expense', icon: '🥡', order: 1, parentId: 'cat_food' },
+      ]);
+      (adapter.getTransactionsByMonth as any).mockImplementation((month: string) => {
+        if (month === '2026-04') return Promise.resolve([
+          { id: '1', type: 'expense', amount: 160000, categoryId: 'cat_food', paymentMethod: 'wechat', date: '2026-04-15', createdAt: 1 },
+          { id: '2', type: 'expense', amount: 30000, categoryId: 'cat_sub_takeout', paymentMethod: 'wechat', date: '2026-04-16', createdAt: 2 },
+        ]);
+        if (month === '2026-05') return Promise.resolve([
+          { id: '3', type: 'expense', amount: 100000, categoryId: 'cat_food', paymentMethod: 'wechat', date: '2026-05-10', createdAt: 3 },
+        ]);
+        return Promise.resolve([]);
+      });
+
+      const { result } = renderHook(() => useBudget('2026-06', adapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      const history = await result.current.getBudgetHistory('2026-04', '2026-06');
+
+      expect(history).toHaveLength(2);
+      // 按月份升序
+      expect(history[0].month).toBe('2026-04');
+      expect(history[1].month).toBe('2026-05');
+
+      // 4月：总预算 500000，餐饮支出 160000+30000=190000，执行率 190000/500000=38%
+      expect(history[0].totalBudget).toBe(500000);
+      expect(history[0].totalSpent).toBe(190000);
+      expect(history[0].totalRate).toBe(38);
+
+      // 4月餐饮分类：预算 200000，支出 190000（含子分类），执行率 95%
+      expect(history[0].categories).toHaveLength(1);
+      expect(history[0].categories[0].categoryName).toBe('餐饮');
+      expect(history[0].categories[0].budget).toBe(200000);
+      expect(history[0].categories[0].spent).toBe(190000);
+      expect(history[0].categories[0].rate).toBe(95);
+
+      // 5月：总预算 500000，餐饮支出 100000，执行率 20%
+      expect(history[1].totalRate).toBe(20);
+      expect(history[1].categories[0].rate).toBe(67); // 100000/150000≈67%
+    });
+
+    it('范围内没有预算时返回空数组', async () => {
+      (adapter.getBudgetsInRange as any).mockResolvedValue([]);
+
+      const { result } = renderHook(() => useBudget('2026-06', adapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      const history = await result.current.getBudgetHistory('2026-01', '2026-03');
+      expect(history).toEqual([]);
+    });
+
+    it('某月只有总预算无分类预算时不包含 categories', async () => {
+      (adapter.getBudgetsInRange as any).mockResolvedValue([
+        { id: 'b1', categoryId: '__total__', month: '2026-04', amount: 300000 },
+      ]);
+      (adapter.getAllCategories as any).mockResolvedValue([]);
+      (adapter.getTransactionsByMonth as any).mockResolvedValue([
+        { id: '1', type: 'expense', amount: 150000, categoryId: 'cat_food', paymentMethod: 'wechat', date: '2026-04-15', createdAt: 1 },
+      ]);
+
+      const { result } = renderHook(() => useBudget('2026-06', adapter));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      const history = await result.current.getBudgetHistory('2026-04', '2026-04');
+      expect(history).toHaveLength(1);
+      expect(history[0].totalRate).toBe(50);
+      expect(history[0].categories).toEqual([]);
+    });
+  });
 });
