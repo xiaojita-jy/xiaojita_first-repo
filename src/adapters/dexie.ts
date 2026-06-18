@@ -119,6 +119,10 @@ export const DexieAdapter: IAdapter = {
     await db.budgets.bulkDelete(targets.map(b => b.id));
   },
 
+  async getBudgetsInRange(startMonth: string, endMonth: string) {
+    return db.budgets.where('month').between(startMonth, endMonth, true, true).toArray();
+  },
+
   // —— Settings ——
   async getSetting(key: string) {
     const row = await db.settings.get(key);
