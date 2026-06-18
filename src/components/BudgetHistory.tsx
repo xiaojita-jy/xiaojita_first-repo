@@ -40,7 +40,11 @@ export default function BudgetHistory() {
   const loadData = useCallback(async () => {
     const sm = `${startYear}-${String(startMonth).padStart(2, '0')}`;
     const em = `${endYear}-${String(endMonth).padStart(2, '0')}`;
-    if (sm > em) return;
+    if (sm > em) {
+      setData([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const result = await getBudgetHistory(sm, em);
     setData(result);
