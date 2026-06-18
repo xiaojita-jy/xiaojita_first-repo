@@ -4,6 +4,24 @@ import { generateId, getCurrentMonth } from '../utils/format';
 import type { Budget, Category, BudgetAlert } from '../models';
 import type { IAdapter } from '../adapters/types';
 
+export interface BudgetCategoryRate {
+  categoryId: string;
+  categoryName: string;
+  categoryIcon: string;
+  color?: string;
+  budget: number;
+  spent: number;
+  rate: number;
+}
+
+export interface BudgetHistoryItem {
+  month: string;
+  totalBudget: number;
+  totalSpent: number;
+  totalRate: number;
+  categories: BudgetCategoryRate[];
+}
+
 export function useBudget(month?: string, adapter: IAdapter = DexieAdapter) {
   const currentMonth = month || getCurrentMonth();
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -133,5 +151,67 @@ export function useBudget(month?: string, adapter: IAdapter = DexieAdapter) {
     return alerts;
   }, [budgets, currentMonth, adapter]);
 
-  return { budgets, loading, getBudget, setBudget, removeBudget, calculateProgress, checkAlerts, reload: load };
+  const getBudgetHistory = useCallback(async (startMonth: string, endMonth: string) => {
+    const allBudgets = await adapter.getBudgetsInRange(startMonth, endMonth);
+    const categories = await adapter.getAllCategories();
+
+    // 按月份分组
+    const byMonth = new Map<string, Budget[]>();
+    for (const b of allBudgets) {
+      if (!byMonth.has(b.month)) byMonth.set(b.month, []);
+      byMonth.get(b.month)!.push(b);
+    }
+
+    const result: BudgetHistoryItem[] = [];
+
+    for (const [month, monthBudgets] of byMonth) {
+      const txs = await adapter.getTransactionsByMonth(month);
+      const expenseTxs = txs.filter(t => t.type === 'expense');
+      const totalSpent = expenseTxs.reduce((s, t) => s + t.amount, 0);
+
+      const totalBudget = monthBudgets.find(b => !b.categoryId || b.categoryId === '__total__');
+
+      const categoryRates: BudgetCategoryRate[] = [];
+
+      for (const b of monthBudgets) {
+        if (!b.categoryId || b.categoryId === '__total__') continue;
+
+        const cat = categories.find(c => c.id === b.categoryId);
+        if (!cat) continue;
+
+        // 计算该分类及其子分类的支出
+        const spent = expenseTxs
+          .filter(t => {
+            if (t.categoryId === b.categoryId) return true;
+            const txCat = categories.find(c => c.id === t.categoryId);
+            return txCat?.parentId === b.categoryId;
+          })
+          .reduce((s, t) => s + t.amount, 0);
+
+        categoryRates.push({
+          categoryId: b.categoryId,
+          categoryName: cat.name,
+          categoryIcon: cat.icon,
+          color: cat.color,
+          budget: b.amount,
+          spent,
+          rate: b.amount > 0 ? Math.round((spent / b.amount) * 100) : 0,
+        });
+      }
+
+      result.push({
+        month,
+        totalBudget: totalBudget?.amount ?? 0,
+        totalSpent,
+        totalRate: totalBudget && totalBudget.amount > 0
+          ? Math.round((totalSpent / totalBudget.amount) * 100)
+          : 0,
+        categories: categoryRates,
+      });
+    }
+
+    return result.sort((a, b) => a.month.localeCompare(b.month));
+  }, [adapter]);
+
+  return { budgets, loading, getBudget, setBudget, removeBudget, calculateProgress, checkAlerts, getBudgetHistory, reload: load };
 }
