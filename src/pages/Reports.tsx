@@ -7,6 +7,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 const CURRENT_MONTH = new Date().getMonth() + 1;
 
 const Charts = lazy(() => import('../components/Charts'));
+const BudgetHistory = lazy(() => import('../components/BudgetHistory'));
 
 function ChartFallback() {
   return (
@@ -191,6 +192,13 @@ export default function Reports() {
           ))}
         </div>
       )}
+
+      {/* Budget history comparison */}
+      <div className="mt-4">
+        <Suspense fallback={<div className="card p-4"><p className="text-center text-gray-400 py-6 text-sm">加载中...</p></div>}>
+          <BudgetHistory />
+        </Suspense>
+      </div>
     </div>
   );
 }
