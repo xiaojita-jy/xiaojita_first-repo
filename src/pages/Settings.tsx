@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCategories } from '../hooks/useCategories';
+import { useTemplates } from '../hooks/useTemplates';
 import { exportBackup, importBackup } from '../utils/backup';
 import { exportCSV } from '../utils/csv';
-import { formatBackupTime, generateId } from '../utils/format';
+import { formatBackupTime, generateId, formatAmount } from '../utils/format';
 import ConfirmDialog from '../components/ConfirmDialog';
 import CategoryForm from '../components/CategoryForm';
 import type { Category } from '../models';
@@ -11,6 +12,10 @@ import type { Category } from '../models';
 export default function Settings() {
   const navigate = useNavigate();
   const { categories, addCategory, updateCategory, deleteCategory, moveUp, moveDown } = useCategories();
+  const { templates, update: updateTemplate, remove: removeTemplate, moveUp: moveTplUp, moveDown: moveTplDown } = useTemplates();
+  const [editingTemplateName, setEditingTemplateName] = useState<string | null>(null);
+  const [editNameValue, setEditNameValue] = useState('');
+  const [deleteTplTarget, setDeleteTplTarget] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState('');
   const [importMsg, setImportMsg] = useState('');
   const [lastBackup, setLastBackup] = useState<string | null>(null);
@@ -50,6 +55,12 @@ export default function Settings() {
       setDeleteError(e.message);
       setDeleteTarget(null);
     }
+  };
+
+  const handleDeleteTemplate = async () => {
+    if (!deleteTplTarget) return;
+    await removeTemplate(deleteTplTarget);
+    setDeleteTplTarget(null);
   };
 
   const handleAddCategory = async (data: { name: string; icon: string; type: 'expense' | 'income'; color?: string }) => {
@@ -279,6 +290,93 @@ export default function Settings() {
       </div>
 
       <div className="card p-4 mb-4">
+        <h2 className="text-sm font-semibold text-ink mb-3">模板管理</h2>
+        {templates.length === 0 ? (
+          <p className="text-xs text-gray-400 text-center py-2">暂无模板，记一笔时可保存为模板</p>
+        ) : (
+          <div className="space-y-1">
+            {[...templates].sort((a, b) => a.order - b.order).map((tpl, idx, arr) => {
+              const cat = categories.find(c => c.id === tpl.categoryId);
+              const isEditingName = editingTemplateName === tpl.id;
+
+              // 分类路径
+              let catPath: string;
+              if (tpl.subCategoryId) {
+                const sub = categories.find(c => c.id === tpl.subCategoryId);
+                const parent = sub ? categories.find(c => c.id === sub.parentId) : undefined;
+                catPath = parent && sub ? `${parent.name}·${sub.name}` : (sub?.name || '未知分类');
+              } else if (cat?.parentId) {
+                const parent = categories.find(c => c.id === cat.parentId);
+                catPath = parent ? `${parent.name}·${cat.name}` : (cat?.name || '未知分类');
+              } else {
+                catPath = cat?.name || '未知分类';
+              }
+
+              // 图标
+              const displayIcon = tpl.subCategoryId
+                ? (categories.find(c => c.id === tpl.subCategoryId)?.icon || cat?.icon || '📌')
+                : (cat?.icon || '📌');
+
+              return (
+                <div key={tpl.id} className="flex items-center justify-between py-2 border-b border-gray-50">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-sm shrink-0">{displayIcon}</span>
+                    {isEditingName ? (
+                      <input
+                        className="text-sm border border-blue-300 rounded px-1.5 py-0.5 w-24 shrink-0"
+                        value={editNameValue}
+                        onChange={e => setEditNameValue(e.target.value)}
+                        onBlur={() => {
+                          if (editNameValue && editNameValue !== tpl.name) {
+                            updateTemplate(tpl.id, { name: editNameValue });
+                          }
+                          setEditingTemplateName(null);
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                          if (e.key === 'Escape') setEditingTemplateName(null);
+                        }}
+                        autoFocus
+                      />
+                    ) : (
+                      <span className="text-sm text-ink truncate">{tpl.name}</span>
+                    )}
+                    <span className="text-xs text-gray-400 truncate">{catPath}</span>
+                    <span className={`text-xs font-medium tabular-nums shrink-0 ${tpl.type === 'expense' ? 'text-red-400' : 'text-green-500'}`}>
+                      {tpl.type === 'expense' ? '-' : '+'}{formatAmount(tpl.amount)}
+                    </span>
+                    <span className={`text-xs px-1.5 py-0.5 rounded shrink-0 ${tpl.type === 'expense' ? 'bg-red-50 text-red-400' : 'bg-green-50 text-green-500'}`}>
+                      {tpl.type === 'expense' ? '支出' : '收入'}
+                    </span>
+                  </div>
+                  <div className="flex gap-1 ml-2 shrink-0">
+                    <button
+                      onClick={() => { setEditingTemplateName(tpl.id); setEditNameValue(tpl.name); }}
+                      className="text-xs text-blue-400"
+                      title="编辑名称"
+                    >✏️</button>
+                    <button onClick={() => setDeleteTplTarget(tpl.id)} className="text-xs text-red-400" title="删除">🗑️</button>
+                    <button
+                      onClick={() => moveTplUp(tpl.id)}
+                      disabled={idx <= 0}
+                      className={`text-xs ${idx <= 0 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                      title="上移"
+                    >↑</button>
+                    <button
+                      onClick={() => moveTplDown(tpl.id)}
+                      disabled={idx >= arr.length - 1}
+                      className={`text-xs ${idx >= arr.length - 1 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                      title="下移"
+                    >↓</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="card p-4 mb-4">
         <h2 className="text-sm font-semibold text-ink mb-3">数据管理</h2>
         {importMsg && (
           <p className={`text-xs mb-2 ${importMsg.includes('成功') ? 'text-green-500' : 'text-red-500'}`}>{importMsg}</p>
@@ -304,6 +402,14 @@ export default function Settings() {
         message="删除分类将无法恢复，确定要删除吗？"
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTplTarget}
+        title="删除模板"
+        message="确定要删除该模板吗？"
+        onConfirm={handleDeleteTemplate}
+        onCancel={() => setDeleteTplTarget(null)}
       />
 
       <ConfirmDialog
