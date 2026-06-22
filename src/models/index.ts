@@ -54,6 +54,19 @@ export interface BudgetAlert {
   percentage: number;        // 0-100 百分比
 }
 
+export interface Template {
+  id: string;
+  name: string;              // 用户手动命名
+  type: 'expense' | 'income';
+  amount: number;            // 单位：分
+  categoryId: string;
+  subCategoryId?: string;
+  paymentMethod: PaymentMethod;
+  note?: string;
+  order: number;
+  createdAt: number;         // Unix timestamp (ms)
+}
+
 // ========== 默认分类 ==========
 
 let _catId = 0;
