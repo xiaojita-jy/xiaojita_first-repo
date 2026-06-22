@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { Transaction, Category, Budget } from '../models';
+import type { Transaction, Category, Budget, Template } from '../models';
 import type { IAdapter } from './types';
 
 class KeepAccountsDB extends Dexie {
@@ -7,6 +7,7 @@ class KeepAccountsDB extends Dexie {
   categories!: Table<Category, string>;
   budgets!: Table<Budget, string>;
   settings!: Table<{ key: string; value: string }, string>;
+  templates!: Table<Template, string>;
 
   constructor() {
     super('KeepAccountsDB');
@@ -18,6 +19,13 @@ class KeepAccountsDB extends Dexie {
     }).upgrade(async tx => {
       // v1→v2: 新增 order 索引，清空旧分类数据后重新播种
       await tx.table('categories').clear();
+    });
+    this.version(3).stores({
+      transactions: 'id, date, categoryId, type, amount',
+      categories: 'id, type, parentId, order',
+      budgets: 'id, [month+categoryId]',
+      settings: 'key',
+      templates: 'id, order',
     });
   }
 }
@@ -131,6 +139,23 @@ export const DexieAdapter: IAdapter = {
 
   async setSetting(key: string, value: string) {
     await db.settings.put({ key, value });
+  },
+
+  // —— Templates ——
+  async getAllTemplates() {
+    return db.templates.orderBy('order').toArray();
+  },
+
+  async addTemplate(t: Template) {
+    await db.templates.add(t);
+  },
+
+  async updateTemplate(id: string, data: Partial<Template>) {
+    await db.templates.update(id, data);
+  },
+
+  async deleteTemplate(id: string) {
+    await db.templates.delete(id);
   },
 
   // —— Lifecycle ——
