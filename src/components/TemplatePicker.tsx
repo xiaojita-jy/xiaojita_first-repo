@@ -29,14 +29,15 @@ export default function TemplatePicker({
   const formatCategory = (tpl: Template): string => {
     const cat = getCategoryInfo(tpl.categoryId);
     if (!cat) return '未知分类';
-    if (tpl.subCategoryId) {
-      const sub = getCategoryInfo(tpl.subCategoryId);
-      return sub ? `${cat.name}·${sub.name}` : cat.name;
-    }
-    // If categoryId itself is a sub-category, find its parent
+    // If categoryId is a sub-category, resolve parent first
     if (cat.parentId) {
       const parent = getCategoryInfo(cat.parentId);
       return parent ? `${parent.name}·${cat.name}` : cat.name;
+    }
+    // categoryId is top-level; check for distinct subCategoryId
+    if (tpl.subCategoryId && tpl.subCategoryId !== tpl.categoryId) {
+      const sub = getCategoryInfo(tpl.subCategoryId);
+      return sub ? `${cat.name}·${sub.name}` : cat.name;
     }
     return cat.name;
   };

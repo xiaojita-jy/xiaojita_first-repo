@@ -94,8 +94,15 @@ export default function AddRecord() {
   const handleSelectTemplate = (tpl: typeof templates[0]) => {
     setType(tpl.type);
     setAmountStr(formatAmount(tpl.amount));
-    setCategoryId(tpl.categoryId);
-    setSubCategoryId(tpl.subCategoryId);
+    // If categoryId is a sub-category, map parent→categoryId, sub→subCategoryId
+    const cat = allCategories.find(c => c.id === tpl.categoryId);
+    if (cat?.parentId) {
+      setCategoryId(cat.parentId);
+      setSubCategoryId(tpl.categoryId);
+    } else {
+      setCategoryId(tpl.categoryId);
+      setSubCategoryId(tpl.subCategoryId);
+    }
     setPaymentMethod(tpl.paymentMethod);
     setNote(tpl.note || '');
     setShowTemplatePicker(false);
