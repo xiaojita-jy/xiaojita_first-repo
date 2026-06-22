@@ -97,7 +97,7 @@ export default function AddRecord() {
     setCategoryId(tpl.categoryId);
     setSubCategoryId(tpl.subCategoryId);
     setPaymentMethod(tpl.paymentMethod);
-    if (tpl.note) setNote(tpl.note);
+    setNote(tpl.note || '');
     setShowTemplatePicker(false);
   };
 
