@@ -24,14 +24,13 @@ export interface IAdapter {
   setBudget(budget: Budget): Promise<void>;
   deleteBudget(id: string): Promise<void>;
   deleteBudgetsByCategory(categoryId: string): Promise<void>;
+  getBudgetsInRange(startMonth: string, endMonth: string): Promise<Budget[]>;
 
   // —— Templates ——
   getAllTemplates(): Promise<Template[]>;
   addTemplate(t: Template): Promise<void>;
   updateTemplate(id: string, data: Partial<Template>): Promise<void>;
   deleteTemplate(id: string): Promise<void>;
-
-  getBudgetsInRange(startMonth: string, endMonth: string): Promise<Budget[]>;
 
   // —— Settings ——
   getSetting(key: string): Promise<string | null>;

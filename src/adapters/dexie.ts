@@ -131,16 +131,6 @@ export const DexieAdapter: IAdapter = {
     return db.budgets.where('month').between(startMonth, endMonth, true, true).toArray();
   },
 
-  // —— Settings ——
-  async getSetting(key: string) {
-    const row = await db.settings.get(key);
-    return row?.value ?? null;
-  },
-
-  async setSetting(key: string, value: string) {
-    await db.settings.put({ key, value });
-  },
-
   // —— Templates ——
   async getAllTemplates() {
     return db.templates.orderBy('order').toArray();
@@ -156,6 +146,16 @@ export const DexieAdapter: IAdapter = {
 
   async deleteTemplate(id: string) {
     await db.templates.delete(id);
+  },
+
+  // —— Settings ——
+  async getSetting(key: string) {
+    const row = await db.settings.get(key);
+    return row?.value ?? null;
+  },
+
+  async setSetting(key: string, value: string) {
+    await db.settings.put({ key, value });
   },
 
   // —— Lifecycle ——
