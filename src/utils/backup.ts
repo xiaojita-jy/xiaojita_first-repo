@@ -1,11 +1,12 @@
 import { DexieAdapter, db } from '../adapters/dexie';
 
 interface BackupData {
-  version: 1;
+  version: number;
   exportedAt: string;
   transactions: any[];
   categories: any[];
   budgets: any[];
+  templates: any[];
 }
 
 async function collectAllBudgets(): Promise<any[]> {
@@ -21,18 +22,20 @@ async function collectAllBudgets(): Promise<any[]> {
 }
 
 export async function exportBackup(): Promise<void> {
-  const [transactions, categories, budgets] = await Promise.all([
+  const [transactions, categories, budgets, templates] = await Promise.all([
     DexieAdapter.getAllTransactions(),
     DexieAdapter.getAllCategories(),
     collectAllBudgets(),
+    DexieAdapter.getAllTemplates(),
   ]);
 
   const backup: BackupData = {
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     transactions,
     categories,
     budgets,
+    templates,
   };
 
   localStorage.setItem('keep_accounts_last_backup', new Date().toISOString());
@@ -61,7 +64,7 @@ export async function importBackup(): Promise<void> {
         const text = await file.text();
         const data: BackupData = JSON.parse(text);
 
-        if (data.version !== 1) throw new Error('备份文件版本不兼容');
+        if (data.version !== 1 && data.version !== 2) throw new Error('备份文件版本不兼容');
         if (!Array.isArray(data.transactions)) throw new Error('备份文件格式错误：缺少交易数据');
         if (!Array.isArray(data.categories)) throw new Error('备份文件格式错误：缺少分类数据');
 
@@ -69,6 +72,7 @@ export async function importBackup(): Promise<void> {
         await db.transactions.clear();
         await db.categories.clear();
         await db.budgets.clear();
+        await db.templates.clear();
 
         for (const cat of data.categories) {
           await DexieAdapter.addCategory(cat);
@@ -79,6 +83,12 @@ export async function importBackup(): Promise<void> {
         if (Array.isArray(data.budgets)) {
           for (const budget of data.budgets) {
             await DexieAdapter.setBudget(budget);
+          }
+        }
+        // v2 支持模板导入
+        if (Array.isArray(data.templates)) {
+          for (const tpl of data.templates) {
+            await DexieAdapter.addTemplate(tpl);
           }
         }
         resolve();

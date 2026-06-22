@@ -34,6 +34,16 @@ vi.mock('../../adapters/dexie', () => ({
       add: vi.fn(() => Promise.resolve()),
       update: vi.fn(() => Promise.resolve()),
     },
+    templates: {
+      clear: vi.fn(() => Promise.resolve()),
+      orderBy: vi.fn(() => ({ toArray: vi.fn(() => Promise.resolve([])) })),
+      where: vi.fn(() => ({
+        equals: vi.fn(() => ({ sortBy: vi.fn(() => Promise.resolve([])) })),
+      })),
+      add: vi.fn(() => Promise.resolve()),
+      update: vi.fn(() => Promise.resolve()),
+      delete: vi.fn(() => Promise.resolve()),
+    },
   },
   DexieAdapter: {
     getAllTransactions: vi.fn(() => Promise.resolve([])),
@@ -56,6 +66,10 @@ vi.mock('../../adapters/dexie', () => ({
     getSetting: vi.fn(() => Promise.resolve(null)),
     setSetting: vi.fn(() => Promise.resolve()),
     seedDefaultCategories: vi.fn(() => Promise.resolve()),
+    getAllTemplates: vi.fn(() => Promise.resolve([])),
+    addTemplate: vi.fn(() => Promise.resolve()),
+    updateTemplate: vi.fn(() => Promise.resolve()),
+    deleteTemplate: vi.fn(() => Promise.resolve()),
   },
 }));
 
