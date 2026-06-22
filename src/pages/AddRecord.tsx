@@ -74,9 +74,9 @@ export default function AddRecord() {
         const alerts = await checkAlerts(allCategories);
         for (const alert of alerts) {
           if (alert.level === 'danger') {
-            showToast(`🔴 「${alert.categoryName}」已超支 ${formatAmount(Math.abs(alert.remaining))}`, 'danger');
+            showToast(`🔴 「${alert.categoryName}」已超支 ${formatAmount(Math.abs(alert.remaining), { minOne: true })}`, 'danger');
           } else {
-            showToast(`⚠️ 「${alert.categoryName}」预算已用 ${alert.percentage}%，剩 ${formatAmount(alert.remaining)}`, 'warning');
+            showToast(`⚠️ 「${alert.categoryName}」预算已用 ${alert.percentage}%，剩 ${formatAmount(alert.remaining, { minOne: true })}`, 'warning');
           }
         }
       } catch {

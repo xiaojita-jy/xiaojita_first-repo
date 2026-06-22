@@ -343,7 +343,7 @@ export default function Settings() {
                     )}
                     <span className="text-xs text-gray-400 truncate">{catPath}</span>
                     <span className={`text-xs font-medium tabular-nums shrink-0 ${tpl.type === 'expense' ? 'text-red-400' : 'text-green-500'}`}>
-                      {tpl.type === 'expense' ? '-' : '+'}{formatAmount(tpl.amount)}
+                      {tpl.type === 'expense' ? '-' : '+'}{formatAmount(tpl.amount, { minOne: true })}
                     </span>
                     <span className={`text-xs px-1.5 py-0.5 rounded shrink-0 ${tpl.type === 'expense' ? 'bg-red-50 text-red-400' : 'bg-green-50 text-green-500'}`}>
                       {tpl.type === 'expense' ? '支出' : '收入'}

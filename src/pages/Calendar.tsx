@@ -45,7 +45,7 @@ export default function Calendar() {
 
   /** 格内金额显示，超大金额截断 */
   function formatCellAmount(cents: number): string {
-    if (cents >= 99900) return '¥999+';
+    if (cents >= 99900) return '999+';
     return formatAmount(cents);
   }
 

@@ -15,7 +15,7 @@ export default function AmountInput({ value, onChange }: Props) {
         onClick={() => inputRef.current?.focus()}
       >
         <span className={value ? '' : 'text-gray-300'}>
-          {value || '0.00'}
+          {value || '0'}
         </span>
       </div>
       <input

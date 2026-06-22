@@ -8,9 +8,11 @@ export function centsToYuan(cents: number): number {
 /**
  * 分 → 显示字符串（1234.56）
  */
-export function formatAmount(cents: number): string {
+export function formatAmount(cents: number, opts?: { minOne?: boolean }): string {
   const yuan = Math.abs(cents) / 100;
-  return yuan.toFixed(2);
+  const rounded = Math.round(yuan);
+  if (opts?.minOne && rounded === 0 && cents !== 0) return '1';
+  return String(rounded);
 }
 
 /**

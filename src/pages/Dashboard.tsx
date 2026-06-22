@@ -102,8 +102,8 @@ export default function Dashboard() {
             }`}>
               {a.categoryIcon} {a.categoryName}：
               {a.level === 'danger'
-                ? `已超支 ${formatAmount(Math.abs(a.remaining))}`
-                : `已用 ${a.percentage}%，剩 ${formatAmount(a.remaining)}`}
+                ? `已超支 ${formatAmount(Math.abs(a.remaining), { minOne: true })}`
+                : `已用 ${a.percentage}%，剩 ${formatAmount(a.remaining, { minOne: true })}`}
             </p>
           ))}
         </div>
@@ -143,7 +143,7 @@ export default function Dashboard() {
           <p className="text-sm font-medium text-yellow-800">异常提醒</p>
           {anomalies.map(a => (
             <p key={a.categoryId} className="text-xs text-yellow-700 mt-1">
-              「{a.categoryName}」本月已花 {formatAmount(a.currentAmount)}，较前3月均值增长 {a.deviation}%
+              「{a.categoryName}」本月已花 {formatAmount(a.currentAmount, { minOne: true })}，较前3月均值增长 {a.deviation}%
             </p>
           ))}
         </div>

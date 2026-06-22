@@ -17,8 +17,10 @@ function matchesSearch(tx: Transaction, query: string, getById: (id: string) => 
   const q = query.toLowerCase().trim();
   if (!q) return false;
 
-  // 金额
-  if (formatAmount(tx.amount).includes(q)) return true;
+  // 金额：同时匹配元和分
+  const txYuan = formatAmount(tx.amount);
+  const txCents = String(tx.amount);
+  if (txYuan.includes(q) || txCents.includes(q)) return true;
 
   // 备注
   if (tx.note?.toLowerCase().includes(q)) return true;
@@ -436,7 +438,7 @@ export default function Records() {
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <div className="text-right">
                             <span className={`text-sm font-semibold tabular-nums ${tx.type === 'expense' ? 'text-expense' : 'text-income'}`}>
-                                                          {formatAmount(tx.amount)}
+                                                          {formatAmount(tx.amount, { minOne: true })}
                             </span>
                             <span className="block text-[10px] text-gray-400">{getPaymentLabel(tx.paymentMethod)}</span>
                           </div>

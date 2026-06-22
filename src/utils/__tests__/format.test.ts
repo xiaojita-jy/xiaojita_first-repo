@@ -23,12 +23,18 @@ describe('centsToYuan', () => {
 });
 
 describe('formatAmount', () => {
-  it('0 分 → 0.00', () => expect(formatAmount(0)).toBe('0.00'));
-  it('10000 分 → 100.00', () => expect(formatAmount(10000)).toBe('100.00'));
-  it('123456 分 → 1234.56', () => expect(formatAmount(123456)).toBe('1234.56'));
-  it('-500 分 → 5.00（不输出负号，靠颜色区分）', () => expect(formatAmount(-500)).toBe('5.00'));
-  it('1 分 → 0.01', () => expect(formatAmount(1)).toBe('0.01'));
-  it('1000500 分 → 10005.00', () => expect(formatAmount(1000500)).toBe('10005.00'));
+  it('0 分 → 0', () => expect(formatAmount(0)).toBe('0'));
+  it('10000 分 → 100', () => expect(formatAmount(10000)).toBe('100'));
+  it('123456 分 → 1235（四舍五入）', () => expect(formatAmount(123456)).toBe('1235'));
+  it('-500 分 → 5（不输出负号，靠颜色区分）', () => expect(formatAmount(-500)).toBe('5'));
+  it('1 分 → 0（取整为 0）', () => expect(formatAmount(1)).toBe('0'));
+  it('50 分 → 1（四舍五入边界）', () => expect(formatAmount(50)).toBe('1'));
+  it('49 分 → 0（四舍五入边界）', () => expect(formatAmount(49)).toBe('0'));
+  it('1000500 分 → 10005', () => expect(formatAmount(1000500)).toBe('10005'));
+  it('minOne: 1 分 → 1', () => expect(formatAmount(1, { minOne: true })).toBe('1'));
+  it('minOne: 0 分 → 0', () => expect(formatAmount(0, { minOne: true })).toBe('0'));
+  it('minOne: 49 分 → 1', () => expect(formatAmount(49, { minOne: true })).toBe('1'));
+  it('minOne: 50 分 → 1', () => expect(formatAmount(50, { minOne: true })).toBe('1'));
 });
 
 describe('yuanToCents', () => {

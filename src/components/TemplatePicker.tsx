@@ -94,7 +94,7 @@ export default function TemplatePicker({
                     {/* Amount + type badge */}
                     <div className="text-right flex-shrink-0">
                       <div className={`text-sm font-semibold tabular-nums ${tpl.type === 'expense' ? 'text-expense' : 'text-income'}`}>
-                        {tpl.type === 'expense' ? '-' : '+'}{formatAmount(tpl.amount)}
+                        {tpl.type === 'expense' ? '-' : '+'}{formatAmount(tpl.amount, { minOne: true })}
                       </div>
                       <div className={`text-xs px-1.5 py-0.5 rounded mt-0.5 ${typeColor(tpl.type)}`}>
                         {typeLabel(tpl.type)}
