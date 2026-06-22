@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import AmountInput from '../components/AmountInput';
 import CategoryPicker from '../components/CategoryPicker';
 import PaymentPicker from '../components/PaymentPicker';
+import TemplatePicker from '../components/TemplatePicker';
 import { useCategories } from '../hooks/useCategories';
 import { useTransactions } from '../hooks/useTransactions';
 import { useBudget } from '../hooks/useBudget';
+import { useTemplates } from '../hooks/useTemplates';
 import { parseAmountToCents, getToday, formatAmount } from '../utils/format';
 import { showToast } from '../utils/toast';
 import type { PaymentMethod } from '../models';
@@ -15,6 +17,10 @@ export default function AddRecord() {
   const { expenseCategories, incomeCategories, loading: catLoading, error: catError, getSubs, categories: allCategories } = useCategories();
   const { add } = useTransactions();
   const { checkAlerts } = useBudget();
+  const { templates, add: addTemplate, loading: tplLoading } = useTemplates();
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState('');
 
   const [type, setType] = useState<'expense' | 'income'>('expense');
   const [amountStr, setAmountStr] = useState('');
@@ -85,6 +91,37 @@ export default function AddRecord() {
     }
   };
 
+  const handleSelectTemplate = (tpl: typeof templates[0]) => {
+    setType(tpl.type);
+    setAmountStr(formatAmount(tpl.amount));
+    setCategoryId(tpl.categoryId);
+    setSubCategoryId(tpl.subCategoryId);
+    setPaymentMethod(tpl.paymentMethod);
+    if (tpl.note) setNote(tpl.note);
+    setShowTemplatePicker(false);
+  };
+
+  const handleSaveTemplate = async () => {
+    if (!templateName.trim() || !categoryId) return;
+    const amount = parseAmountToCents(amountStr);
+    if (amount <= 0) return;
+    try {
+      await addTemplate(templateName.trim(), {
+        type,
+        amount,
+        categoryId: subCategoryId || categoryId,
+        subCategoryId: subCategoryId || undefined,
+        paymentMethod,
+        note: note || undefined,
+      });
+      setShowSaveTemplate(false);
+      setTemplateName('');
+      // 模板保存成功，对话框关闭即是反馈
+    } catch {
+      showToast('模板保存失败', 'danger');
+    }
+  };
+
   const canSave = amountStr && categoryId && !saving;
 
   return (
@@ -150,6 +187,28 @@ export default function AddRecord() {
 
       {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
 
+      {/* 模板操作 */}
+      <div className="flex gap-3 mt-6">
+        <button
+          onClick={() => setShowTemplatePicker(true)}
+          disabled={tplLoading}
+          className="flex-1 py-2.5 rounded-xl border border-blue-200 text-blue-500 text-sm font-medium hover:bg-blue-50 transition-colors"
+        >
+          📋 使用模板
+        </button>
+        <button
+          onClick={() => { setTemplateName(''); setShowSaveTemplate(true); }}
+          disabled={!categoryId || !amountStr}
+          className={`flex-1 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+            categoryId && amountStr
+              ? 'border-blue-200 text-blue-500 hover:bg-blue-50'
+              : 'border-gray-200 text-gray-300 cursor-not-allowed'
+          }`}
+        >
+          💾 保存为模板
+        </button>
+      </div>
+
       <button
         onClick={handleSave}
         disabled={!canSave}
@@ -159,6 +218,59 @@ export default function AddRecord() {
       >
         {saving ? '保存中...' : '✔️ 保存记账'}
       </button>
+
+      {/* 模板选择弹窗 */}
+      {showTemplatePicker && (
+        <TemplatePicker
+          templates={templates}
+          allCategories={allCategories}
+          onSelect={handleSelectTemplate}
+          onClose={() => setShowTemplatePicker(false)}
+        />
+      )}
+
+      {/* 保存模板命名弹窗 */}
+      {showSaveTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowSaveTemplate(false)}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div
+            className="relative bg-white rounded-2xl px-6 py-5 w-80 shadow-xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 className="text-sm font-semibold text-ink mb-3">保存为模板</h3>
+            <p className="text-xs text-gray-400 mb-3">请输入模板名称：</p>
+            <input
+              type="text"
+              value={templateName}
+              onChange={e => setTemplateName(e.target.value)}
+              placeholder="例如：午餐外卖"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400 mb-4"
+              autoFocus
+              onKeyDown={e => {
+                if (e.key === 'Enter') handleSaveTemplate();
+                if (e.key === 'Escape') setShowSaveTemplate(false);
+              }}
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowSaveTemplate(false)}
+                className="flex-1 py-2 rounded-xl bg-gray-100 text-gray-600 text-sm font-medium"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleSaveTemplate}
+                disabled={!templateName.trim()}
+                className={`flex-1 py-2 rounded-xl text-white text-sm font-medium ${
+                  templateName.trim() ? 'bg-blue-500 active:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'
+                }`}
+              >
+                保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
