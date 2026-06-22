@@ -43,6 +43,12 @@ export default function Calendar() {
     return 4;
   }
 
+  /** 格内金额显示，超大金额截断 */
+  function formatCellAmount(cents: number): string {
+    if (cents >= 99900) return '¥999+';
+    return formatAmount(cents);
+  }
+
   // 热力图背景色映射（复用 Tailwind red 色系）
   const HEAT_BG: Record<number, string> = {
     0: 'bg-white border border-[#f0ede7]',
@@ -79,10 +85,12 @@ export default function Calendar() {
     const curDailyAvg = curExpenses.reduce((s, t) => s + t.amount, 0) / curDays;
     const prevDailyAvg = prevExpenses.reduce((s, t) => s + t.amount, 0) / prevDays;
 
-    // 月累计（同期：本月截止今天，上月截止同一天）
+    // 月累计（同期比较：本月和上月都截止到同一天）
     const today = new Date();
     const curMonthTotal = curExpenses.reduce((s, t) => s + t.amount, 0);
     const dayOfMonth = Math.min(today.getDate(), new Date(year, month, 0).getDate());
+    const curMonthCutoff = `${year}-${String(month).padStart(2, '0')}-${String(dayOfMonth).padStart(2, '0')}`;
+    const curMonthSamePeriod = curExpenses.filter(t => t.date <= curMonthCutoff).reduce((s, t) => s + t.amount, 0);
     const prevMonthCutoff = `${prevMonthPrefix}-${String(Math.min(dayOfMonth, new Date(prevYear, prevMonth, 0).getDate())).padStart(2, '0')}`;
     const prevMonthSamePeriod = prevExpenses.filter(t => t.date <= prevMonthCutoff).reduce((s, t) => s + t.amount, 0);
 
@@ -96,7 +104,7 @@ export default function Calendar() {
       dailyAvgDelta: prevDailyAvg > 0 ? Math.round(((curDailyAvg - prevDailyAvg) / prevDailyAvg) * 100) : 0,
       monthTotal: curMonthTotal,
       prevMonthSamePeriod,
-      monthTotalDelta: prevMonthSamePeriod > 0 ? Math.round(((curMonthTotal - prevMonthSamePeriod) / prevMonthSamePeriod) * 100) : 0,
+      monthTotalDelta: prevMonthSamePeriod > 0 ? Math.round(((curMonthSamePeriod - prevMonthSamePeriod) / prevMonthSamePeriod) * 100) : 0,
       txDays: curTxDays,
       totalDays: totalDaysInMonth,
     };
@@ -324,7 +332,7 @@ export default function Calendar() {
                     ${expenseAmount >= 20000 ? 'text-base' : expenseAmount >= 10000 ? 'text-sm' : expenseAmount >= 5000 ? 'text-xs' : 'text-[11px]'}
                     ${HEAT_TEXT[heatLevel]}
                   `}>
-                    {formatAmount(expenseAmount)}
+                    {formatCellAmount(expenseAmount)}
                   </span>
                 </div>
               )}
