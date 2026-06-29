@@ -203,11 +203,11 @@ export default function Records() {
   };
 
   return (
-    <div className="px-4 py-8">
+    <div className="px-5 pt-7 pb-8">
       {/* === 标题行：搜索模式 vs 普通模式 === */}
       {searchMode ? (
         <div className="flex items-center gap-2 mb-3">
-          <button onClick={clearSearch} className="text-blue-500 text-sm flex-shrink-0 cursor-pointer">← 返回</button>
+          <button onClick={clearSearch} className="text-accent text-sm flex-shrink-0 cursor-pointer">← 返回</button>
           <div className="flex-1 relative">
             <input
               ref={searchInputRef}
@@ -216,12 +216,13 @@ export default function Records() {
               onChange={e => setSearchQuery(e.target.value)}
               onKeyDown={e => { if (e.key === 'Escape') clearSearch(); }}
               placeholder="搜分类、备注、金额、支付方式..."
-              className="w-full px-3 py-1.5 pr-8 rounded-lg border border-blue-300 bg-blue-50 text-sm text-ink focus:outline-none focus:border-blue-400"
+              className="w-full px-3 py-1.5 pr-8 rounded-xl border text-sm text-text-primary focus:outline-none"
+              style={{ background: 'rgba(30,41,59,0.4)', borderColor: 'rgba(56,189,248,0.4)' }}
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-gray-600 cursor-pointer"
               >
                 ✕
               </button>
@@ -230,10 +231,10 @@ export default function Records() {
         </div>
       ) : (
         <div className="flex items-center gap-2 mb-3">
-          <h1 className="text-xl font-bold text-ink">流水</h1>
+          <h1 className="text-[26px] font-bold text-text-primary tracking-tight">流水</h1>
           <button
             onClick={() => setSearchMode(true)}
-            className="text-gray-400 hover:text-ink ml-0.5 cursor-pointer"
+            className="text-slate-400 hover:text-slate-200 ml-0.5 cursor-pointer"
             title="搜索"
           >
             🔍
@@ -244,7 +245,7 @@ export default function Records() {
                 <select
                   value={year}
                   onChange={e => handleYearChange(Number(e.target.value))}
-                  className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+                  className="select-dark"
                 >
                   {yearOptions.map(y => (
                     <option key={y} value={y}>{y}年</option>
@@ -253,7 +254,7 @@ export default function Records() {
                 <select
                   value={month}
                   onChange={e => setMonth(Number(e.target.value))}
-                  className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+                  className="select-dark"
                 >
                   {monthOptions.map(m => (
                     <option key={m} value={m}>{m}月</option>
@@ -262,7 +263,7 @@ export default function Records() {
                 <select
                   value={typeFilter}
                   onChange={e => setTypeFilter(e.target.value as 'all' | 'expense' | 'income')}
-                  className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+                  className="select-dark"
                 >
                   <option value="all">全部类型</option>
                   <option value="expense">💰 支出</option>
@@ -271,7 +272,7 @@ export default function Records() {
                 <select
                   value={filterPayment}
                   onChange={e => setFilterPayment(e.target.value as PaymentMethod | '')}
-                  className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+                  className="select-dark"
                 >
                   <option value="">全部方式</option>
                   {PAYMENT_METHODS.map(pm => (
@@ -292,7 +293,7 @@ export default function Records() {
           </span>
           <button
             onClick={() => setSearchParams({})}
-            className="text-xs text-blue-500 cursor-pointer"
+            className="text-xs text-accent cursor-pointer"
           >
             ← 返回整月
           </button>
@@ -302,7 +303,7 @@ export default function Records() {
       {/* === 汇总栏 === */}
       {!isSearchActive && (
         <div className="flex items-center justify-between text-sm mb-3 px-1">
-          <span className="text-gray-500 text-xs">共{filtered.length}笔</span>
+          <span className="text-slate-400 text-xs">共{filtered.length}笔</span>
           <div className="flex gap-3">
             <span className="text-expense tabular-nums">支出 {formatAmount(expenseTotal)}</span>
             <span className="text-income tabular-nums">收入 {formatAmount(incomeTotal)}</span>
@@ -311,7 +312,7 @@ export default function Records() {
       )}
 
       {isSearchActive && (
-        <div className="text-xs text-gray-400 mb-3 px-1">
+        <div className="text-xs text-slate-500 mb-3 px-1">
           {searchQuery.trim()
             ? `搜索"${searchQuery.trim()}"，找到 ${filtered.length} 笔记录`
             : '输入关键词搜索'}
@@ -320,7 +321,7 @@ export default function Records() {
 
       {/* === 记录列表 === */}
       {loading ? (
-        <p className="text-center text-gray-400 py-10">加载中...</p>
+        <p className="text-center text-slate-500 py-10">加载中...</p>
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={isSearchActive ? '🔍' : '📋'}
@@ -341,7 +342,7 @@ export default function Records() {
               <div key={date}>
                 {/* 日期标题行 */}
                 <div className="flex items-center justify-between px-1 mb-2">
-                  <span className="text-sm font-semibold text-ink">
+                  <span className="text-sm font-semibold text-slate-200">
                     {formatDateShort(date)} {getDayOfWeek(date)}
                   </span>
                   <div className="flex gap-3 text-xs">
@@ -358,16 +359,17 @@ export default function Records() {
                     const subCat = isSubCat ? cat : (tx.subCategoryId ? getById(tx.subCategoryId) : null);
                     const isEditing = editing?.id === tx.id;
                     return isEditing ? (
-                      <div key={tx.id} className="bg-blue-50/50 rounded-xl p-3 border border-blue-200">
+                      <div key={tx.id} className="rounded-xl p-3 border" style={{ background: 'rgba(56,189,248,0.08)', borderColor: 'rgba(56,189,248,0.3)' }}>
                         <div className="space-y-2">
-                          <div className="flex bg-gray-100 rounded-lg p-1">
+                          <div className="flex rounded-lg p-1" style={{ background: 'rgba(20,30,44,0.6)' }}>
                             {(['expense', 'income'] as const).map(t => (
                               <button
                                 key={t}
                                 onClick={() => setEditing({ ...editing, type: t, categoryId: '' })}
                                 className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
-                                  editing.type === t ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500'
+                                  editing.type === t ? 'text-text-primary' : 'text-slate-500'
                                 }`}
+                                style={editing.type === t ? { background: 'rgba(30,41,59,0.8)' } : undefined}
                               >
                                 {t === 'expense' ? '💰 支出' : '💵 收入'}
                               </button>
@@ -378,21 +380,21 @@ export default function Records() {
                               type="text" inputMode="decimal"
                               value={editing.amount}
                               onChange={e => setEditing({ ...editing, amount: e.target.value })}
-                              className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm"
+                              className="flex-1 px-2 py-1 border border-[rgba(71,85,105,0.35)] rounded text-sm bg-[rgba(30,41,59,0.4)] text-text-primary"
                               placeholder="金额"
                             />
                             <input
                               type="date"
                               value={editing.date}
                               onChange={e => setEditing({ ...editing, date: e.target.value })}
-                              className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm"
+                              className="flex-1 px-2 py-1 border border-[rgba(71,85,105,0.35)] rounded text-sm bg-[rgba(30,41,59,0.4)] text-text-primary"
                             />
                           </div>
                           <div className="flex gap-2">
                             <select
                               value={editing.categoryId}
                               onChange={e => setEditing({ ...editing, categoryId: e.target.value })}
-                              className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm bg-white"
+                              className="flex-1 px-2 py-1 border border-[rgba(71,85,105,0.35)] rounded text-sm bg-[rgba(30,41,59,0.4)] text-text-primary"
                             >
                               <option value="" disabled>请选择分类</option>
                               {categories
@@ -402,7 +404,7 @@ export default function Records() {
                             <select
                               value={editing.paymentMethod}
                               onChange={e => setEditing({ ...editing, paymentMethod: e.target.value as PaymentMethod })}
-                              className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm bg-white"
+                              className="flex-1 px-2 py-1 border border-[rgba(71,85,105,0.35)] rounded text-sm bg-[rgba(30,41,59,0.4)] text-text-primary"
                             >
                               {PAYMENT_METHODS.map(pm => (
                                 <option key={pm.value} value={pm.value}>{pm.label}</option>
@@ -414,12 +416,12 @@ export default function Records() {
                             value={editing.note}
                             onChange={e => setEditing({ ...editing, note: e.target.value })}
                             placeholder="备注"
-                            className="w-full px-2 py-1 border border-gray-200 rounded text-sm"
+                            className="w-full px-2 py-1 border border-[rgba(71,85,105,0.35)] rounded text-sm bg-[rgba(30,41,59,0.4)] text-text-primary"
                           />
                           {editError && <p className="text-red-500 text-xs text-center">{editError}</p>}
                           <div className="flex gap-2 pt-1">
-                            <button onClick={handleSaveEdit} className="flex-1 py-1.5 bg-blue-500 text-white rounded text-xs font-medium">保存</button>
-                            <button onClick={() => { setEditing(null); setEditError(''); }} className="flex-1 py-1.5 border border-gray-300 text-gray-600 rounded text-xs">取消</button>
+                            <button onClick={handleSaveEdit} className="flex-1 py-1.5 text-white rounded text-xs font-medium" style={{ background: 'linear-gradient(135deg, #0284c7, #0ea5e9)' }}>保存</button>
+                            <button onClick={() => { setEditing(null); setEditError(''); }} className="flex-1 py-1.5 border border-[rgba(71,85,105,0.35)] text-slate-300 rounded text-xs">取消</button>
                           </div>
                         </div>
                       </div>
@@ -428,11 +430,11 @@ export default function Records() {
                         <div className="flex items-center gap-2 min-w-0">
                           <span className="text-lg flex-shrink-0">{displayCat?.icon || '📌'}</span>
                           <div className="min-w-0">
-                            <p className="text-sm text-ink truncate">
+                            <p className="text-sm text-slate-200 truncate">
                               {displayCat?.name || '未知'}
-                              {subCat && <span className="text-gray-400"> · {subCat.name}</span>}
+                              {subCat && <span className="text-slate-400"> · {subCat.name}</span>}
                             </p>
-                            {tx.note && <p className="text-xs text-gray-400 truncate">{tx.note}</p>}
+                            {tx.note && <p className="text-xs text-slate-500 truncate">{tx.note}</p>}
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
@@ -440,11 +442,11 @@ export default function Records() {
                             <span className={`text-sm font-semibold tabular-nums ${tx.type === 'expense' ? 'text-expense' : 'text-income'}`}>
                                                           {formatAmount(tx.amount, { minOne: true })}
                             </span>
-                            <span className="block text-[10px] text-gray-400">{getPaymentLabel(tx.paymentMethod)}</span>
+                            <span className="block text-[10px] text-slate-500">{getPaymentLabel(tx.paymentMethod)}</span>
                           </div>
                           <div className="flex flex-col gap-1">
-                            <button onClick={() => handleEdit(tx)} className="text-base leading-none opacity-40 hover:opacity-80 transition-opacity cursor-pointer" title="编辑">✏️</button>
-                            <button onClick={() => setDeleteId(tx.id)} className="text-base leading-none opacity-40 hover:opacity-80 transition-opacity cursor-pointer" title="删除">🗑️</button>
+                            <button onClick={() => handleEdit(tx)} className="text-base leading-none opacity-50 hover:opacity-100 text-slate-400 transition-opacity cursor-pointer" title="编辑">✏️</button>
+                            <button onClick={() => setDeleteId(tx.id)} className="text-base leading-none opacity-50 hover:opacity-100 text-slate-400 transition-opacity cursor-pointer" title="删除">🗑️</button>
                           </div>
                         </div>
                       </div>
