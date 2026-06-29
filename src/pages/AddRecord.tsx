@@ -132,17 +132,18 @@ export default function AddRecord() {
   const canSave = amountStr && categoryId && !saving;
 
   return (
-    <div className="px-4 py-8">
-      <h1 className="text-xl font-bold text-ink mb-6">记一笔</h1>
+    <div className="px-5 pt-7 pb-8">
+      <h1 className="text-[26px] font-bold text-text-primary tracking-tight mb-6">记一笔</h1>
 
-      <div className="flex bg-[#f0ece6] rounded-lg p-1 mb-5">
+      <div className="flex rounded-xl p-1 mb-5" style={{ background: 'rgba(20,30,44,0.6)' }}>
         {(['expense', 'income'] as const).map(t => (
           <button
             key={t}
             onClick={() => { setType(t); setCategoryId(''); setSubCategoryId(undefined); }}
             className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${
-              type === t ? 'bg-white text-ink shadow-sm' : 'text-gray-400'
+              type === t ? 'text-text-primary' : 'text-slate-500'
             }`}
+            style={type === t ? { background: 'rgba(30,41,59,0.8)', border: '1px solid rgba(56,189,248,0.3)' } : undefined}
           >
             {t === 'expense' ? '💰 支出' : '💵 收入'}
           </button>
@@ -169,48 +170,48 @@ export default function AddRecord() {
         )}
 
         <div>
-          <label className="block text-sm text-gray-400 mb-2">日期</label>
+          <label className="block text-sm text-slate-400 mb-2">日期</label>
           <input
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-border text-sm text-ink focus:outline-none focus:border-blue-400 bg-white"
+            className="input-dark"
           />
         </div>
 
         <PaymentPicker value={paymentMethod} onChange={setPaymentMethod} />
 
         <div>
-          <label className="block text-sm text-gray-400 mb-2">备注（选填）</label>
+          <label className="block text-sm text-slate-400 mb-2">备注（选填）</label>
           <input
             type="text"
             value={note}
             onChange={e => setNote(e.target.value)}
             placeholder="例如：和同事AA午餐"
-            className="w-full px-4 py-2.5 rounded-xl border border-border text-sm text-ink focus:outline-none focus:border-blue-400 bg-white"
+            className="input-dark"
           />
         </div>
       </div>
 
-      {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
+      {error && <p className="text-red-400 text-sm mt-4 text-center">{error}</p>}
 
       {/* 模板操作 */}
       <div className="flex gap-3 mt-6">
         <button
           onClick={() => setShowTemplatePicker(true)}
           disabled={tplLoading}
-          className="flex-1 py-2.5 rounded-xl border border-blue-200 text-blue-500 text-sm font-medium hover:bg-blue-50 transition-colors"
+          className="btn-secondary flex-1"
         >
           📋 使用模板
         </button>
         <button
           onClick={() => { setTemplateName(''); setShowSaveTemplate(true); }}
           disabled={!categoryId || !amountStr}
-          className={`flex-1 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+          className={
             categoryId && amountStr
-              ? 'border-blue-200 text-blue-500 hover:bg-blue-50'
-              : 'border-gray-200 text-gray-300 cursor-not-allowed'
-          }`}
+              ? 'btn-secondary flex-1'
+              : 'flex-1 py-2.5 rounded-xl border border-[rgba(71,85,105,0.2)] text-slate-600 text-sm font-medium cursor-not-allowed'
+          }
         >
           💾 保存为模板
         </button>
@@ -220,7 +221,7 @@ export default function AddRecord() {
         onClick={handleSave}
         disabled={!canSave}
         className={`w-full mt-6 py-3 rounded-xl text-white font-medium transition-colors ${
-          canSave ? 'bg-blue-500 active:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'
+          canSave ? 'btn-primary' : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
         }`}
       >
         {saving ? '保存中...' : '✔️ 保存记账'}
@@ -239,19 +240,20 @@ export default function AddRecord() {
       {/* 保存模板命名弹窗 */}
       {showSaveTemplate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowSaveTemplate(false)}>
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           <div
-            className="relative bg-white rounded-2xl px-6 py-5 w-80 shadow-xl"
+            className="relative rounded-2xl border border-[rgba(71,85,105,0.3)] px-6 py-5 w-80 shadow-xl"
+            style={{ background: 'rgba(20,30,44,0.95)', backdropFilter: 'blur(20px)' }}
             onClick={e => e.stopPropagation()}
           >
-            <h3 className="text-sm font-semibold text-ink mb-3">保存为模板</h3>
-            <p className="text-xs text-gray-400 mb-3">请输入模板名称：</p>
+            <h3 className="text-sm font-semibold text-slate-200 mb-3">保存为模板</h3>
+            <p className="text-xs text-slate-400 mb-3">请输入模板名称：</p>
             <input
               type="text"
               value={templateName}
               onChange={e => setTemplateName(e.target.value)}
               placeholder="例如：午餐外卖"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400 mb-4"
+              className="input-dark mb-4"
               autoFocus
               onKeyDown={e => {
                 if (e.key === 'Enter') handleSaveTemplate();
@@ -261,7 +263,7 @@ export default function AddRecord() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowSaveTemplate(false)}
-                className="flex-1 py-2 rounded-xl bg-gray-100 text-gray-600 text-sm font-medium"
+                className="flex-1 py-2 rounded-xl bg-[rgba(71,85,105,0.2)] text-slate-300 text-sm font-medium"
               >
                 取消
               </button>
@@ -269,8 +271,9 @@ export default function AddRecord() {
                 onClick={handleSaveTemplate}
                 disabled={!templateName.trim()}
                 className={`flex-1 py-2 rounded-xl text-white text-sm font-medium ${
-                  templateName.trim() ? 'bg-blue-500 active:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'
+                  templateName.trim() ? '' : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
                 }`}
+                style={templateName.trim() ? { background: 'linear-gradient(135deg, #0284c7, #0ea5e9)' } : undefined}
               >
                 保存
               </button>
