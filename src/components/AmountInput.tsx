@@ -11,10 +11,10 @@ export default function AmountInput({ value, onChange }: Props) {
   return (
     <div className="py-6 text-center">
       <div
-        className="text-4xl font-bold text-ink tabular-nums flex items-center justify-center"
+        className="text-5xl font-bold text-text-primary tabular-nums flex items-center justify-center tracking-tight"
         onClick={() => inputRef.current?.focus()}
       >
-        <span className={value ? '' : 'text-gray-300'}>
+        <span className={value ? '' : 'text-slate-600'}>
           {value || '0'}
         </span>
       </div>
@@ -32,7 +32,7 @@ export default function AmountInput({ value, onChange }: Props) {
         }}
         autoFocus
       />
-      <p className="text-xs text-gray-400 mt-2">点击金额输入</p>
+      <p className="text-xs text-slate-500 mt-2">点击金额输入</p>
     </div>
   );
 }

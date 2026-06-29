@@ -11,19 +11,15 @@ interface Props {
 }
 
 export default function CategoryPicker({
-  type,
-  categories,
-  subCategories,
-  selectedCategoryId,
-  selectedSubCategoryId,
-  onCategoryChange,
-  onSubCategoryChange,
+  type, categories, subCategories,
+  selectedCategoryId, selectedSubCategoryId,
+  onCategoryChange, onSubCategoryChange,
 }: Props) {
   const topCategories = categories.filter(c => c.type === type && !c.parentId);
 
   return (
     <div>
-      <label className="block text-sm text-gray-400 mb-2">
+      <label className="block text-sm text-slate-400 mb-2">
         {type === 'expense' ? '支出分类' : '收入分类'}
       </label>
       <div className="grid grid-cols-4 gap-3">
@@ -32,10 +28,10 @@ export default function CategoryPicker({
             key={cat.id}
             type="button"
             onClick={() => onCategoryChange(cat.id)}
-            className={`flex flex-col items-center py-3 px-1 rounded-xl border transition-colors overflow-hidden ${
+            className={`flex flex-col items-center py-3 px-1 rounded-xl border transition-all overflow-hidden ${
               selectedCategoryId === cat.id
-                ? 'bg-blue-50 border-blue-400'
-                : 'bg-white border-border'
+                ? 'border-accent bg-sky-950/30'
+                : 'border-[rgba(71,85,105,0.25)] bg-[rgba(30,41,59,0.35)]'
             }`}
           >
             {cat.color && (
@@ -45,7 +41,7 @@ export default function CategoryPicker({
               />
             )}
             <span className="text-2xl">{cat.icon}</span>
-            <span className="text-xs mt-1 text-ink">{cat.name}</span>
+            <span className="text-xs mt-1 text-slate-300">{cat.name}</span>
           </button>
         ))}
       </div>
@@ -59,8 +55,8 @@ export default function CategoryPicker({
               onClick={() => onSubCategoryChange(sub.id)}
               className={`px-3 py-1 rounded-full text-xs border transition-colors ${
                 selectedSubCategoryId === sub.id
-                  ? 'bg-blue-500 text-white border-blue-500'
-                  : 'bg-white text-gray-500 border-border'
+                  ? 'bg-accent text-white border-accent'
+                  : 'bg-[rgba(30,41,59,0.35)] text-slate-400 border-[rgba(71,85,105,0.25)]'
               }`}
             >
               {sub.icon} {sub.name}

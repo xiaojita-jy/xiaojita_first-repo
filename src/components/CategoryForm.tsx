@@ -81,19 +81,19 @@ export default function CategoryForm({ category, type: initialType, hideType, on
 
   return (
     <div className="card p-4 mb-4">
-      <h3 className="text-sm font-semibold text-ink mb-3">
+      <h3 className="text-sm font-semibold text-text-primary mb-3">
         {isEdit ? '编辑分类' : '新增分类'}
       </h3>
 
       {!isEdit && !hideType && (
-        <div className="flex bg-[#f0ece6] rounded-lg p-1 mb-4">
+        <div className="flex bg-[rgba(20,30,44,0.6)] rounded-lg p-1 mb-4">
           {(['expense', 'income'] as const).map(t => (
             <button
               key={t}
               type="button"
               onClick={() => setType(t)}
               className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
-                type === t ? 'bg-white text-ink shadow-sm' : 'text-gray-400'
+                type === t ? 'bg-[rgba(30,41,59,0.4)] text-text-primary shadow-sm' : 'text-slate-400'
               }`}
             >
               {t === 'expense' ? '支出' : '收入'}
@@ -103,7 +103,7 @@ export default function CategoryForm({ category, type: initialType, hideType, on
       )}
 
       {/* 图标选择器：6列网格，54个 emoji */}
-      <label className="block text-sm text-gray-400 mb-2">图标</label>
+      <label className="block text-sm text-slate-400 mb-2">图标</label>
       <div className="grid grid-cols-6 gap-2 mb-3">
         {EMOJI_LIST.map(emoji => (
           <button
@@ -112,8 +112,8 @@ export default function CategoryForm({ category, type: initialType, hideType, on
             onClick={() => { setIcon(emoji); setEmojiInput(''); }}
             className={`text-xl py-1.5 rounded-lg border transition-colors ${
               icon === emoji
-                ? 'bg-blue-50 border-blue-400'
-                : 'bg-[#faf9f7] border-border'
+                ? 'bg-sky-950/30 border-accent'
+                : 'bg-[rgba(20,30,44,0.5)] border-[rgba(71,85,105,0.25)]'
             }`}
           >
             {emoji}
@@ -122,17 +122,17 @@ export default function CategoryForm({ category, type: initialType, hideType, on
       </div>
 
       {/* 手动输入 emoji */}
-      <label className="block text-sm text-gray-400 mb-2">或直接输入 emoji</label>
+      <label className="block text-sm text-slate-400 mb-2">或直接输入 emoji</label>
       <input
         type="text"
         value={emojiInput}
         onChange={e => handleEmojiInput(e.target.value)}
         placeholder="粘贴 emoji 或按 Win+."
-        className="w-full px-4 py-2.5 rounded-xl border border-border text-sm text-ink focus:outline-none focus:border-blue-400 bg-white mb-4"
+        className="w-full px-4 py-2.5 rounded-xl border border-[rgba(71,85,105,0.25)] text-sm text-text-primary focus:outline-none focus:border-accent bg-[rgba(30,41,59,0.4)] mb-4"
       />
 
       {/* 颜色选择器：7列，14色 */}
-      <label className="block text-sm text-gray-400 mb-2">颜色（可选）</label>
+      <label className="block text-sm text-slate-400 mb-2">颜色（可选）</label>
       <div className="grid grid-cols-7 gap-2 mb-4">
         {COLOR_PALETTE.map(c => (
           <button
@@ -140,7 +140,7 @@ export default function CategoryForm({ category, type: initialType, hideType, on
             type="button"
             onClick={() => setColor(color === c ? undefined : c)}
             className={`w-8 h-8 rounded-full mx-auto transition-all ${
-              color === c ? 'ring-2 ring-offset-1 ring-blue-400 scale-110' : 'hover:scale-105'
+              color === c ? 'ring-2 ring-offset-1 ring-accent scale-110' : 'hover:scale-105'
             }`}
             style={{ backgroundColor: c }}
             title={c}
@@ -149,22 +149,22 @@ export default function CategoryForm({ category, type: initialType, hideType, on
       </div>
 
       {/* 名称 */}
-      <label className="block text-sm text-gray-400 mb-2">名称</label>
+      <label className="block text-sm text-slate-400 mb-2">名称</label>
       <input
         type="text"
         value={name}
         onChange={e => setName(e.target.value)}
         placeholder="分类名称"
-        className="w-full px-4 py-2.5 rounded-xl border border-border text-sm text-ink focus:outline-none focus:border-blue-400 bg-white mb-4"
+        className="w-full px-4 py-2.5 rounded-xl border border-[rgba(71,85,105,0.25)] text-sm text-text-primary focus:outline-none focus:border-accent bg-[rgba(30,41,59,0.4)] mb-4"
       />
 
-      {error && <p className="text-red-500 text-xs mb-3">{error}</p>}
+      {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
 
       <div className="flex gap-3">
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 py-2 rounded-lg border border-border text-gray-500 text-sm"
+          className="flex-1 py-2 rounded-lg border border-[rgba(71,85,105,0.25)] text-slate-300 text-sm"
         >
           取消
         </button>
@@ -173,8 +173,9 @@ export default function CategoryForm({ category, type: initialType, hideType, on
           onClick={handleSave}
           disabled={saving || !name.trim()}
           className={`flex-1 py-2 rounded-lg text-white text-sm font-medium transition-colors ${
-            saving || !name.trim() ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 active:bg-blue-600'
+            saving || !name.trim() ? 'bg-slate-700/50 cursor-not-allowed' : ''
           }`}
+          style={saving || !name.trim() ? undefined : { background: 'linear-gradient(135deg, #0284c7, #0ea5e9)' }}
         >
           {saving ? '保存中...' : '保存'}
         </button>

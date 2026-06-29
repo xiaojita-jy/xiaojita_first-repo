@@ -27,11 +27,12 @@ export default function ToastContainer() {
         <div
           key={toast.id}
           role="alert"
-          className={`px-4 py-3 rounded-xl shadow-lg text-sm font-medium pointer-events-auto cursor-pointer ${
+          className={`px-4 py-3 rounded-xl shadow-lg text-sm font-medium pointer-events-auto cursor-pointer border ${
             toast.type === 'danger'
-              ? 'bg-red-500 text-white'
-              : 'bg-amber-500 text-white'
+              ? 'bg-red-500/90 text-white border-red-400/30'
+              : 'bg-amber-500/90 text-white border-amber-400/30'
           } ${toast.exiting ? 'animate-slide-out' : 'animate-slide-in'}`}
+          style={{ backdropFilter: 'blur(8px)' }}
           onClick={() => dismiss(toast.id)}
         >
           {toast.message}

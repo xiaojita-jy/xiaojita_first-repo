@@ -10,9 +10,9 @@ const CURRENT_YEAR = new Date().getFullYear();
 const CURRENT_MONTH = new Date().getMonth() + 1;
 
 function rateColor(rate: number): string {
-  if (rate >= 100) return 'text-red-500';
-  if (rate >= 80) return 'text-amber-500';
-  return 'text-green-500';
+  if (rate >= 100) return 'text-red-400';
+  if (rate >= 80) return 'text-amber-400';
+  return 'text-emerald-400';
 }
 
 type ViewMode = 'table' | 'chart';
@@ -107,25 +107,25 @@ export default function BudgetHistory() {
 
   return (
     <div className="card p-4">
-      <h2 className="text-sm font-semibold text-ink mb-3">预算执行率对比</h2>
+      <h2 className="text-sm font-semibold text-text-primary mb-3">预算执行率对比</h2>
 
       {/* 月份范围选择器 */}
       <div className="flex items-center gap-1.5 mb-3 flex-wrap">
         <select value={startYear} onChange={e => handleStartYearChange(Number(e.target.value))}
-          className="px-2 py-1 rounded-lg border border-border text-sm bg-white text-ink">
+          className="px-2 py-1 rounded-lg border border-border text-sm bg-[rgba(30,41,59,0.4)] text-text-primary">
           {yearOptions.map(y => <option key={y} value={y}>{y}年</option>)}
         </select>
         <select value={startMonth} onChange={e => setStartMonth(Number(e.target.value))}
-          className="px-2 py-1 rounded-lg border border-border text-sm bg-white text-ink">
+          className="px-2 py-1 rounded-lg border border-border text-sm bg-[rgba(30,41,59,0.4)] text-text-primary">
           {startMonthOptions.map(m => <option key={m} value={m}>{m}月</option>)}
         </select>
-        <span className="text-xs text-gray-400 mx-1">—</span>
+        <span className="text-xs text-slate-400 mx-1">—</span>
         <select value={endYear} onChange={e => handleEndYearChange(Number(e.target.value))}
-          className="px-2 py-1 rounded-lg border border-border text-sm bg-white text-ink">
+          className="px-2 py-1 rounded-lg border border-border text-sm bg-[rgba(30,41,59,0.4)] text-text-primary">
           {yearOptions.map(y => <option key={y} value={y}>{y}年</option>)}
         </select>
         <select value={endMonth} onChange={e => setEndMonth(Number(e.target.value))}
-          className="px-2 py-1 rounded-lg border border-border text-sm bg-white text-ink">
+          className="px-2 py-1 rounded-lg border border-border text-sm bg-[rgba(30,41,59,0.4)] text-text-primary">
           {endMonthOptions.map(m => <option key={m} value={m}>{m}月</option>)}
         </select>
 
@@ -134,16 +134,18 @@ export default function BudgetHistory() {
           <button
             onClick={() => setViewMode('table')}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-              viewMode === 'table' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500'
+              viewMode === 'table' ? 'text-white' : 'bg-[rgba(30,41,59,0.4)] text-slate-400'
             }`}
+            style={viewMode === 'table' ? { background: 'linear-gradient(135deg, #0284c7, #0ea5e9)' } : undefined}
           >
             表格
           </button>
           <button
             onClick={() => setViewMode('chart')}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-              viewMode === 'chart' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500'
+              viewMode === 'chart' ? 'text-white' : 'bg-[rgba(30,41,59,0.4)] text-slate-400'
             }`}
+            style={viewMode === 'chart' ? { background: 'linear-gradient(135deg, #0284c7, #0ea5e9)' } : undefined}
           >
             图表
           </button>
@@ -151,9 +153,9 @@ export default function BudgetHistory() {
       </div>
 
       {loading ? (
-        <p className="text-center text-gray-400 py-6 text-sm">加载中...</p>
+        <p className="text-center text-slate-400 py-6 text-sm">加载中...</p>
       ) : data.length === 0 ? (
-        <p className="text-center text-gray-400 py-6 text-sm">所选范围内无预算记录</p>
+        <p className="text-center text-slate-400 py-6 text-sm">所选范围内无预算记录</p>
       ) : viewMode === 'table' ? (
         /* 表格模式 */
         <div>
@@ -163,7 +165,7 @@ export default function BudgetHistory() {
               onClick={() => setTableOrientation(
                 tableOrientation === 'monthsAsRows' ? 'categoriesAsRows' : 'monthsAsRows'
               )}
-              className="px-2 py-1 text-xs text-blue-500 hover:bg-blue-50 rounded"
+              className="px-2 py-1 text-xs text-accent hover:bg-sky-950/30 rounded"
             >
               行↔列切换
             </button>
@@ -174,11 +176,11 @@ export default function BudgetHistory() {
               /* 行=月份，列=总预算+分类 */
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="text-left py-1.5 px-2 text-gray-400 font-normal">月份</th>
-                    <th className="text-right py-1.5 px-2 text-gray-400 font-normal">总预算</th>
+                  <tr className="border-b border-[rgba(71,85,105,0.2)]">
+                    <th className="text-left py-1.5 px-2 text-slate-400 font-normal">月份</th>
+                    <th className="text-right py-1.5 px-2 text-slate-400 font-normal">总预算</th>
                     {allCategoryKeys.map(c => (
-                      <th key={c.categoryId} className="text-right py-1.5 px-2 text-gray-400 font-normal">
+                      <th key={c.categoryId} className="text-right py-1.5 px-2 text-slate-400 font-normal">
                         {c.icon} {c.name}
                       </th>
                     ))}
@@ -186,8 +188,8 @@ export default function BudgetHistory() {
                 </thead>
                 <tbody>
                   {data.map(item => (
-                    <tr key={item.month} className="border-b border-gray-50">
-                      <td className="py-1.5 px-2 text-ink">{formatMonthLabel(item.month)}</td>
+                    <tr key={item.month} className="border-b border-[rgba(71,85,105,0.15)]">
+                      <td className="py-1.5 px-2 text-text-primary">{formatMonthLabel(item.month)}</td>
                       <td className={`py-1.5 px-2 text-right tabular-nums ${rateColor(item.totalRate)}`}>
                         {item.totalBudget > 0 ? `${item.totalRate}%` : '—'}
                       </td>
@@ -195,7 +197,7 @@ export default function BudgetHistory() {
                         const catData = item.categories.find(c => c.categoryId === ck.categoryId);
                         return (
                           <td key={ck.categoryId} className={`py-1.5 px-2 text-right tabular-nums ${
-                            catData ? rateColor(catData.rate) : 'text-gray-300'
+                            catData ? rateColor(catData.rate) : 'text-slate-600'
                           }`}>
                             {catData ? `${catData.rate}%` : '—'}
                           </td>
@@ -209,18 +211,18 @@ export default function BudgetHistory() {
               /* 行=总预算+分类，列=月份 */
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="text-left py-1.5 px-2 text-gray-400 font-normal">类别</th>
+                  <tr className="border-b border-[rgba(71,85,105,0.2)]">
+                    <th className="text-left py-1.5 px-2 text-slate-400 font-normal">类别</th>
                     {data.map(item => (
-                      <th key={item.month} className="text-right py-1.5 px-2 text-gray-400 font-normal">
+                      <th key={item.month} className="text-right py-1.5 px-2 text-slate-400 font-normal">
                         {formatMonthLabel(item.month)}
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-gray-50">
-                    <td className="py-1.5 px-2 text-ink">💰 总预算</td>
+                  <tr className="border-b border-[rgba(71,85,105,0.15)]">
+                    <td className="py-1.5 px-2 text-text-primary">💰 总预算</td>
                     {data.map(item => (
                       <td key={item.month} className={`py-1.5 px-2 text-right tabular-nums ${rateColor(item.totalRate)}`}>
                         {item.totalBudget > 0 ? `${item.totalRate}%` : '—'}
@@ -228,13 +230,13 @@ export default function BudgetHistory() {
                     ))}
                   </tr>
                   {allCategoryKeys.map(ck => (
-                    <tr key={ck.categoryId} className="border-b border-gray-50">
-                      <td className="py-1.5 px-2 text-ink">{ck.icon} {ck.name}</td>
+                    <tr key={ck.categoryId} className="border-b border-[rgba(71,85,105,0.15)]">
+                      <td className="py-1.5 px-2 text-text-primary">{ck.icon} {ck.name}</td>
                       {data.map(item => {
                         const catData = item.categories.find(c => c.categoryId === ck.categoryId);
                         return (
                           <td key={item.month} className={`py-1.5 px-2 text-right tabular-nums ${
-                            catData ? rateColor(catData.rate) : 'text-gray-300'
+                            catData ? rateColor(catData.rate) : 'text-slate-600'
                           }`}>
                             {catData ? `${catData.rate}%` : '—'}
                           </td>
@@ -252,7 +254,7 @@ export default function BudgetHistory() {
         <div>
           <ResponsiveContainer width="100%" height={280}>
             <ComposedChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(71,85,105,0.2)" />
               <XAxis dataKey="month" tick={{ fontSize: 12 }} />
               <YAxis
                 tick={{ fontSize: 12 }}
