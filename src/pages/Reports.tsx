@@ -12,7 +12,7 @@ const BudgetHistory = lazy(() => import('../components/BudgetHistory'));
 function ChartFallback() {
   return (
     <div className="card p-4 mb-4">
-      <p className="text-center text-gray-400 py-10 text-sm">图表加载中...</p>
+      <p className="text-center text-slate-500 py-10 text-sm">图表加载中...</p>
     </div>
   );
 }
@@ -82,19 +82,19 @@ export default function Reports() {
   const currentIncome = currentMonthSummary?.income ?? 0;
 
   if (loading) {
-    return <div className="px-4 py-8 text-center text-gray-400">加载中...</div>;
+    return <div className="px-4 py-8 text-center text-slate-500">加载中...</div>;
   }
 
   return (
-    <div className="px-4 py-8">
+    <div className="px-5 pt-7 pb-8">
       {/* 标题 + 年份/月份选择器 */}
       <div className="flex items-center gap-2 mb-6">
-        <h1 className="text-xl font-bold text-ink">报表</h1>
+        <h1 className="text-[26px] font-bold text-text-primary tracking-tight">报表</h1>
         <div className="flex gap-1.5 ml-auto">
           <select
             value={year}
             onChange={e => handleYearChange(Number(e.target.value))}
-            className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+            className="select-dark"
           >
             {yearOptions.map(y => (
               <option key={y} value={y}>{y}年</option>
@@ -103,7 +103,7 @@ export default function Reports() {
           <select
             value={month}
             onChange={e => setMonth(Number(e.target.value))}
-            className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+            className="select-dark"
           >
             {monthOptions.map(m => (
               <option key={m} value={m}>{m}月</option>
@@ -114,11 +114,11 @@ export default function Reports() {
 
       {/* Monthly summary — renders immediately */}
       <div className="card p-4 mb-4">
-        <h2 className="text-sm font-semibold text-ink mb-3">月度收支汇总</h2>
+        <h2 className="text-sm font-semibold text-slate-200 mb-3">月度收支汇总</h2>
         <div className="flex justify-around text-center">
           <div>
-            <p className="text-xs text-gray-400">支出</p>
-            <p className="text-lg font-bold text-expense tabular-nums">{formatAmount(currentExpense)}</p>
+            <p className="text-[10.5px] text-slate-500 font-medium">支出</p>
+            <p className="text-xl font-bold text-expense tabular-nums">{formatAmount(currentExpense)}</p>
             {(() => {
               const lastMonth = monthlySummaries.find(s => {
                 const [y, m] = queryMonth.split('-').map(Number);
@@ -131,15 +131,15 @@ export default function Reports() {
               if (change === 0) return <p className="text-xs text-gray-400 mt-0.5">环比持平</p>;
               const isUp = change > 0;
               return (
-                <p className={`text-xs mt-0.5 ${isUp ? 'text-red-400' : 'text-green-500'}`}>
+                <p className={`text-xs mt-0.5 ${isUp ? 'text-red-400' : 'text-emerald-400'}`}>
                   环比 {isUp ? '↑' : '↓'} {Math.abs(change)}%
                 </p>
               );
             })()}
           </div>
           <div>
-            <p className="text-xs text-gray-400">收入</p>
-            <p className="text-lg font-bold text-income tabular-nums">{formatAmount(currentIncome)}</p>
+            <p className="text-[10.5px] text-slate-500 font-medium">收入</p>
+            <p className="text-xl font-bold text-income tabular-nums">{formatAmount(currentIncome)}</p>
             {(() => {
               const lastMonth = monthlySummaries.find(s => {
                 const [y, m] = queryMonth.split('-').map(Number);
@@ -152,7 +152,7 @@ export default function Reports() {
               if (change === 0) return <p className="text-xs text-gray-400 mt-0.5">环比持平</p>;
               const isUp = change > 0;
               return (
-                <p className={`text-xs mt-0.5 ${isUp ? 'text-green-500' : 'text-red-400'}`}>
+                <p className={`text-xs mt-0.5 ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
                   环比 {isUp ? '↑' : '↓'} {Math.abs(change)}%
                 </p>
               );
@@ -182,12 +182,12 @@ export default function Reports() {
 
       {/* Anomalies — no Recharts dependency, renders immediately */}
       {anomalies.length > 0 && (
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h2 className="text-sm font-medium text-gray-800 mb-2">⚠️ 异常预警</h2>
+        <div className="card p-4">
+          <h2 className="text-sm font-semibold text-slate-200 mb-2">⚠️ 异常预警</h2>
           {anomalies.map(a => (
-            <div key={a.categoryId} className="flex justify-between py-2 border-b border-gray-50 last:border-0 text-sm">
+            <div key={a.categoryId} className="flex justify-between py-2 border-b border-[rgba(71,85,105,0.15)] last:border-0 text-sm">
               <span>{a.icon} {a.categoryName}</span>
-              <span className="text-red-500 font-medium">+{a.deviation}%</span>
+              <span className="text-red-400 font-medium">+{a.deviation}%</span>
             </div>
           ))}
         </div>
