@@ -51,19 +51,19 @@ export default function Calendar() {
 
   // 热力图背景色映射（复用 Tailwind red 色系）
   const HEAT_BG: Record<number, string> = {
-    0: 'bg-white border border-[#f0ede7]',
-    1: 'bg-red-50',
-    2: 'bg-red-100',
-    3: 'bg-red-200',
-    4: 'bg-red-300',
+    0: 'bg-[rgba(30,41,59,0.3)] border border-[rgba(71,85,105,0.2)]',
+    1: 'bg-red-950/30',
+    2: 'bg-red-950/50',
+    3: 'bg-red-900/50',
+    4: 'bg-red-800/50',
   };
 
   const HEAT_TEXT: Record<number, string> = {
-    0: 'text-ink',
-    1: 'text-red-600',
-    2: 'text-red-600',
-    3: 'text-red-800',
-    4: 'text-red-900',
+    0: 'text-slate-400',
+    1: 'text-red-300',
+    2: 'text-red-300',
+    3: 'text-red-200',
+    4: 'text-red-100',
   };
 
   // 月度汇总（含上月对比数据）
@@ -161,31 +161,31 @@ export default function Calendar() {
 
   if (loading) {
     return (
-      <div className="px-4 py-8">
+      <div className="px-5 pt-7 pb-8">
         <div className="flex items-center gap-2 mb-6">
-          <h1 className="text-xl font-bold text-ink">日历</h1>
+          <h1 className="text-[26px] font-bold text-text-primary tracking-tight">日历</h1>
         </div>
         {/* 摘要条骨架 */}
-        <div className="card p-3 mb-4 animate-pulse">
+        <div className="card p-4 mb-4 animate-pulse">
           <div className="flex justify-between">
             <div className="flex-1 flex flex-col items-center gap-1">
-              <div className="h-2.5 w-10 bg-gray-200 rounded" />
-              <div className="h-5 w-14 bg-gray-200 rounded" />
+              <div className="h-2.5 w-10 bg-slate-700/40 rounded" />
+              <div className="h-5 w-14 bg-slate-700/40 rounded" />
             </div>
             <div className="flex-1 flex flex-col items-center gap-1">
-              <div className="h-2.5 w-10 bg-gray-200 rounded" />
-              <div className="h-5 w-14 bg-gray-200 rounded" />
+              <div className="h-2.5 w-10 bg-slate-700/40 rounded" />
+              <div className="h-5 w-14 bg-slate-700/40 rounded" />
             </div>
             <div className="flex-1 flex flex-col items-center gap-1">
-              <div className="h-2.5 w-10 bg-gray-200 rounded" />
-              <div className="h-5 w-14 bg-gray-200 rounded" />
+              <div className="h-2.5 w-10 bg-slate-700/40 rounded" />
+              <div className="h-5 w-14 bg-slate-700/40 rounded" />
             </div>
           </div>
         </div>
         {/* 网格骨架 */}
         <div className="grid grid-cols-7 gap-[3px]">
           {Array.from({ length: 35 }).map((_, i) => (
-            <div key={i} className="bg-gray-100 rounded-lg min-h-[52px] animate-pulse" />
+            <div key={i} className="bg-slate-800/30 rounded-lg min-h-[52px] animate-pulse" />
           ))}
         </div>
       </div>
@@ -193,22 +193,22 @@ export default function Calendar() {
   }
 
   return (
-    <div className="px-4 py-8">
+    <div className="px-5 pt-7 pb-8">
       {/* 标题 + 月份选择 */}
       <div className="flex items-center gap-2 mb-4">
-        <h1 className="text-xl font-bold text-ink">日历</h1>
+        <h1 className="text-[26px] font-bold text-text-primary tracking-tight">日历</h1>
         <div className="flex gap-1.5 ml-auto">
           <select
             value={year}
             onChange={e => setYear(Number(e.target.value))}
-            className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+            className="select-dark"
           >
             {YEARS.map(y => <option key={y} value={y}>{y}年</option>)}
           </select>
           <select
             value={month}
             onChange={e => setMonth(Number(e.target.value))}
-            className="px-2.5 py-1.5 rounded-lg border border-border text-sm bg-white text-ink"
+            className="select-dark"
           >
             {MONTHS.map(m => <option key={m} value={m}>{m}月</option>)}
           </select>
@@ -216,11 +216,11 @@ export default function Calendar() {
       </div>
 
       {/* 月度摘要条 */}
-      <div className="card p-3 mb-4">
+      <div className="card p-4 mb-4">
         <div className="flex justify-between items-center">
           <div className="text-center flex-1">
-            <p className="text-[10px] text-gray-400 mb-0.5">日均支出</p>
-            <p className="text-[17px] font-bold text-ink tabular-nums">
+            <p className="text-[10.5px] text-slate-500 font-medium mb-0.5">日均支出</p>
+            <p className="text-xl font-bold text-text-primary tabular-nums">
               {formatAmount(monthSummary.dailyAvg)}
             </p>
             {monthSummary.dailyAvgDelta !== 0 && (
@@ -231,8 +231,8 @@ export default function Calendar() {
           </div>
           <div className="w-px h-9 bg-border mx-2" />
           <div className="text-center flex-1">
-            <p className="text-[10px] text-gray-400 mb-0.5">月累计</p>
-            <p className="text-[17px] font-bold text-ink tabular-nums">
+            <p className="text-[10.5px] text-slate-500 font-medium mb-0.5">月累计</p>
+            <p className="text-xl font-bold text-text-primary tabular-nums">
               {formatAmount(monthSummary.monthTotal)}
             </p>
             {monthSummary.monthTotalDelta !== 0 && (
@@ -243,11 +243,11 @@ export default function Calendar() {
           </div>
           <div className="w-px h-9 bg-border mx-2" />
           <div className="text-center flex-1">
-            <p className="text-[10px] text-gray-400 mb-0.5">交易天数</p>
-            <p className="text-[17px] font-bold text-ink tabular-nums">
-              {monthSummary.txDays}<span className="text-xs font-normal text-gray-400">/{monthSummary.totalDays}</span>
+            <p className="text-[10.5px] text-slate-500 font-medium mb-0.5">交易天数</p>
+            <p className="text-xl font-bold text-text-primary tabular-nums">
+              {monthSummary.txDays}<span className="text-xs text-slate-500">/{monthSummary.totalDays}</span>
             </p>
-            <p className="text-[10px] text-gray-400 mt-0.5">{monthSummary.totalDays}天</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{monthSummary.totalDays}天</p>
           </div>
         </div>
       </div>
@@ -255,7 +255,7 @@ export default function Calendar() {
       {/* 星期头 */}
       <div className="grid grid-cols-7 mb-1">
         {['一', '二', '三', '四', '五', '六', '日'].map(w => (
-          <div key={w} className="text-center text-[11px] text-gray-300 py-2 font-medium">
+          <div key={w} className="text-center text-[11px] text-slate-600 font-medium py-2">
             {w}
           </div>
         ))}
@@ -280,9 +280,9 @@ export default function Calendar() {
                   setYear(d.getFullYear());
                   setMonth(d.getMonth() + 1);
                 }}
-                className="bg-[#f0ede7] rounded-lg min-h-[52px] p-2 flex items-end justify-end cursor-pointer hover:bg-[#ebe7e0] transition-colors"
+                className="bg-[rgba(20,28,38,0.4)] rounded-lg min-h-[52px] p-2 flex items-end justify-end cursor-pointer hover:bg-[rgba(30,41,59,0.5)] transition-colors"
               >
-                <span className="text-xs text-gray-300">{day.day}</span>
+                <span className="text-xs text-slate-600">{day.day}</span>
               </div>
             );
           }
@@ -306,9 +306,9 @@ export default function Calendar() {
                 rounded-lg min-h-[52px] p-2 flex flex-col justify-between
                 relative select-none
                 transition-all duration-150
-                ${isSelected ? 'ring-2 ring-blue-400 scale-[1.05] shadow-md z-10' : ''}
+                ${isSelected ? 'ring-2 ring-accent scale-[1.05] shadow-md z-10' : ''}
                 ${!isSelected && selectedDate ? 'opacity-50' : ''}
-                ${day.isToday && !isSelected ? 'ring-1 ring-inset ring-blue-400' : ''}
+                ${day.isToday && !isSelected ? 'ring-1 ring-inset ring-accent' : ''}
                 ${expenseAmount > 0 || hasIncome ? 'cursor-pointer active:scale-95' : 'cursor-default'}
               `}
             >
@@ -320,7 +320,7 @@ export default function Calendar() {
               <span className={`
                 text-xs self-end leading-none
                 ${HEAT_TEXT[heatLevel]}
-                ${day.isToday && !isSelected ? 'font-semibold !text-blue-500' : heatLevel >= 3 ? 'font-semibold' : ''}
+                ${day.isToday && !isSelected ? 'font-semibold !text-accent' : heatLevel >= 3 ? 'font-semibold' : ''}
               `}>
                 {day.day}
               </span>
@@ -343,15 +343,15 @@ export default function Calendar() {
 
       {/* 详情面板 */}
       {selectedDayDetail && (
-        <div className="mt-3 bg-white rounded-2xl border border-border animate-slide-up">
+        <div className="mt-3 card animate-slide-up">
           {/* 拖拽指示条 */}
           <div className="flex justify-center pt-2 pb-1">
-            <div className="w-8 h-1 rounded-full bg-gray-300" />
+            <div className="w-8 h-1 rounded-full bg-slate-600" />
           </div>
           <div className="px-4 pb-3">
             {/* 日期 + 总计 */}
             <div className="flex justify-between items-baseline mb-1">
-              <span className="text-sm font-semibold text-ink">
+              <span className="text-sm font-semibold text-slate-200">
                 {`${month}月${new Date(selectedDayDetail.date).getDate()}日 · 周${selectedDayDetail.dayOfWeek}`}
               </span>
               <span className="text-xl font-bold text-expense tabular-nums">
@@ -365,15 +365,15 @@ export default function Calendar() {
               </p>
             )}
             {/* 长按提示 */}
-            <p className="text-[10px] text-gray-300 mb-2">长按日期格跳转查看全部记录</p>
+            <p className="text-[10px] text-slate-600 mb-2">长按日期格跳转查看全部记录</p>
             {/* 分类明细 */}
             {selectedDayDetail.categories.map((item) => {
               const cat = getById(item.categoryId);
               return (
-                <div key={item.categoryId} className="flex justify-between items-center py-1.5 border-b border-gray-50 last:border-0">
+                <div key={item.categoryId} className="flex justify-between items-center py-1.5 border-b border-[rgba(71,85,105,0.15)] last:border-0">
                   <div className="flex items-center gap-2">
                     <span className="text-base">{cat?.icon || '📌'}</span>
-                    <span className="text-[13px] text-ink">{cat?.name || '未知'}</span>
+                    <span className="text-[13px] text-slate-200">{cat?.name || '未知'}</span>
                   </div>
                   <div className="text-right">
                     <span className="text-sm font-semibold text-expense tabular-nums">
@@ -394,16 +394,16 @@ export default function Calendar() {
 
       {/* 色阶图例 */}
       <div className="flex items-center gap-2 mt-3 px-1">
-        <span className="text-[10px] text-gray-300">¥0</span>
-        <div className="flex-1 h-1 rounded-full bg-gradient-to-r from-[#f0ede7] via-red-200 to-red-300" />
-        <span className="text-[10px] text-gray-300">¥200+</span>
+        <span className="text-[10px] text-slate-600">¥0</span>
+        <div className="flex-1 h-1 rounded-full bg-gradient-to-r from-[rgba(30,41,59,0.3)] via-red-950/40 to-red-800/50" />
+        <span className="text-[10px] text-slate-600">¥200+</span>
       </div>
 
       {/* 空状态提示 */}
       {monthSummary.txDays === 0 && !loading && (
         <div className="text-center py-8">
           <p className="text-2xl mb-2">📝</p>
-          <p className="text-sm text-gray-400">这个月还没有记录</p>
+          <p className="text-sm text-slate-500">这个月还没有记录</p>
         </div>
       )}
     </div>
