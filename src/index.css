@@ -4,29 +4,82 @@
 
 body {
   -webkit-tap-highlight-color: transparent;
+  background-color: #0a0e14;
+  color: #e2e8f0;
 }
 
+/* Dark scrollbar (Webkit) */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.4); border-radius: 3px; }
+
 @layer components {
+  /* Glass card (replaces original .card) */
   .card {
-    @apply bg-white rounded-xl border border-border;
+    @apply rounded-2xl border;
+    background: rgba(30, 41, 59, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-color: rgba(71, 85, 105, 0.25);
+  }
+
+  /* Dark input base style */
+  .input-dark {
+    @apply px-4 py-2.5 rounded-xl border text-sm transition-colors;
+    background: rgba(30, 41, 59, 0.4);
+    border-color: rgba(71, 85, 105, 0.35);
+    color: #e2e8f0;
+  }
+  .input-dark:focus {
+    border-color: #38bdf8;
+    outline: none;
+  }
+
+  /* Primary action button */
+  .btn-primary {
+    @apply w-full py-3.5 rounded-2xl text-white font-semibold text-sm transition-all;
+    background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    box-shadow: 0 4px 20px rgba(2, 132, 199, 0.25);
+  }
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  /* Secondary button */
+  .btn-secondary {
+    @apply py-2.5 rounded-xl border text-sm font-medium transition-colors text-center;
+    border-color: rgba(71, 85, 105, 0.35);
+    color: #38bdf8;
+    background: transparent;
+  }
+  .btn-secondary:hover {
+    background: rgba(56, 189, 248, 0.08);
+  }
+
+  /* Dark select base style */
+  .select-dark {
+    @apply px-2.5 py-1.5 rounded-xl border text-sm transition-colors;
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(71, 85, 105, 0.35);
+    color: #e2e8f0;
   }
 }
 
 @layer utilities {
   .text-gradient-positive {
-    background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+    background: linear-gradient(135deg, #34d399 0%, #2dd4bf 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .text-gradient-negative {
-    background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+    background: linear-gradient(135deg, #f87171 0%, #fb923c 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .text-gradient-neutral {
-    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

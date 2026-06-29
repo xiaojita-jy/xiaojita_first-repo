@@ -4,11 +4,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper: '#faf9f7',
-        ink: '#1b1b1b',
-        border: '#e8e4dd',
-        expense: '#dc2626',
-        income: '#059669',
+        // --- New dark theme tokens ---
+        'bg-root': '#0a0e14',
+        'bg-surface': 'rgba(30, 41, 59, 0.55)',
+        'border-subtle': 'rgba(71, 85, 105, 0.25)',
+        'border-default': 'rgba(71, 85, 105, 0.35)',
+        'text-primary': '#e2e8f0',
+        'text-secondary': '#94a3b8',
+        'text-muted': '#64748b',
+        'accent': '#38bdf8',
+        'accent-strong': '#0284c7',
+
+        // --- Old token remapping (backward compatible) ---
+        'paper': '#0a0e14',              // was #faf9f7 → dark bg
+        'ink': '#e2e8f0',                // was #1b1b1b → light text
+        'border': 'rgba(71, 85, 105, 0.25)', // was #e8e4dd → dark border
+        'expense': '#f87171',            // was #dc2626 → warm red
+        'income': '#34d399',             // was #059669 → emerald green
       },
       keyframes: {
         'slide-in': {
