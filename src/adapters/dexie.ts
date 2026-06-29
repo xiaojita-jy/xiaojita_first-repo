@@ -123,7 +123,7 @@ export const DexieAdapter: IAdapter = {
   },
 
   async deleteBudgetsByCategory(categoryId: string) {
-    const targets = await db.budgets.where('categoryId').equals(categoryId).toArray();
+    const targets = await db.budgets.filter(b => b.categoryId === categoryId).toArray();
     await db.budgets.bulkDelete(targets.map(b => b.id));
   },
 
