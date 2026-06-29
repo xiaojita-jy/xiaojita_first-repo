@@ -46,13 +46,13 @@ export default function Dashboard() {
   }, []);
 
   if (loading) {
-    return <div className="px-4 py-8 text-center text-gray-400">加载中...</div>;
+    return <div className="px-5 pt-7 pb-8 text-center text-slate-500">加载中...</div>;
   }
 
   if (transactions.length === 0) {
     return (
-      <div className="px-4 py-8">
-        <h1 className="text-xl font-bold text-ink mb-2">概览</h1>
+      <div className="px-5 pt-7 pb-8">
+        <h1 className="text-[26px] font-bold text-text-primary tracking-tight mb-2">概览</h1>
         <EmptyState
           icon="📝"
           message="还没有记账，开始第一笔吧"
@@ -63,21 +63,24 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="px-4 py-8">
-      <h1 className="text-xl font-bold text-ink mb-6">概览</h1>
+    <div className="px-5 pt-7 pb-8">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-[26px] font-bold text-text-primary tracking-tight">概览</h1>
+        <span className="text-xs text-slate-500 font-medium px-2.5 py-1 rounded-full" style={{ background: 'rgba(71,85,105,0.2)' }}>{currentMonth.replace('-', '年')}月</span>
+      </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-5">
-        <div className="card p-3 text-center">
-          <p className="text-xs text-gray-400 mb-1">本月支出</p>
-          <p className="text-lg font-bold text-expense tabular-nums">{formatAmount(totals.expense)}</p>
+      <div className="grid grid-cols-3 gap-3 mb-[18px]">
+        <div className="card p-4 text-center">
+          <p className="text-[10.5px] text-slate-500 uppercase tracking-wider font-medium mb-1">本月支出</p>
+          <p className="text-[22px] font-bold text-expense tabular-nums">{formatAmount(totals.expense)}</p>
         </div>
-        <div className="card p-3 text-center">
-          <p className="text-xs text-gray-400 mb-1">本月收入</p>
-          <p className="text-lg font-bold text-income tabular-nums">{formatAmount(totals.income)}</p>
+        <div className="card p-4 text-center">
+          <p className="text-[10.5px] text-slate-500 uppercase tracking-wider font-medium mb-1">本月收入</p>
+          <p className="text-[22px] font-bold text-income tabular-nums">{formatAmount(totals.income)}</p>
         </div>
-        <div className="card p-3 text-center">
-          <p className="text-xs text-gray-400 mb-1">月度结余</p>
-          <p className={`text-lg font-bold tabular-nums ${
+        <div className="card p-4 text-center">
+          <p className="text-[10.5px] text-slate-500 uppercase tracking-wider font-medium mb-1">月度结余</p>
+          <p className={`text-[22px] font-bold tabular-nums ${
             totals.balance > 0 ? 'text-income' : totals.balance < 0 ? 'text-expense' : 'text-ink'
           }`}>
             {formatAmount(totals.balance)}
@@ -86,19 +89,19 @@ export default function Dashboard() {
       </div>
 
       {budgetAlerts.length > 0 && (
-        <div className={`rounded-xl p-4 mb-4 ${
+        <div className={`rounded-xl p-4 mb-3 ${
           budgetAlerts.some(a => a.level === 'danger')
-            ? 'bg-red-50 border border-red-200'
-            : 'bg-amber-50 border border-amber-200'
+            ? 'bg-red-950/20 border border-red-800/40'
+            : 'bg-amber-950/20 border border-amber-800/40'
         }`}>
           <p className={`text-sm font-medium mb-2 ${
-            budgetAlerts.some(a => a.level === 'danger') ? 'text-red-700' : 'text-amber-700'
+            budgetAlerts.some(a => a.level === 'danger') ? 'text-red-300' : 'text-amber-300'
           }`}>
             {budgetAlerts.some(a => a.level === 'danger') ? '🔴 预算超支提醒' : '⚠️ 预算预警'}
           </p>
           {budgetAlerts.map(a => (
             <p key={a.categoryId ?? '__total__'} className={`text-xs mt-1 ${
-              a.level === 'danger' ? 'text-red-600' : 'text-amber-600'
+              a.level === 'danger' ? 'text-red-400' : 'text-amber-400'
             }`}>
               {a.categoryIcon} {a.categoryName}：
               {a.level === 'danger'
@@ -118,20 +121,22 @@ export default function Dashboard() {
         const weekDays = week.days.length;
         if (weekTxs.length === 0) return null;
         return (
-          <div className="card p-4 mb-4">
-            <h3 className="text-sm font-semibold text-ink mb-3">本周概览</h3>
-            <div className="grid grid-cols-3 gap-3 text-center">
+          <div className="card p-4 mb-3">
+            <h3 className="text-sm font-semibold text-slate-200 mb-3">本周概览</h3>
+            <div className="flex justify-around text-center">
               <div>
-                <p className="text-xs text-gray-400 mb-0.5">本周支出</p>
-                <p className="text-base font-bold text-expense tabular-nums">{formatAmount(weekExpense)}</p>
+                <p className="text-[10.5px] text-slate-500 font-medium mb-1.5">本周支出</p>
+                <p className="text-xl font-bold text-expense tabular-nums">{formatAmount(weekExpense)}</p>
               </div>
+              <div className="w-px" style={{ background: 'rgba(71,85,105,0.2)' }} />
               <div>
-                <p className="text-xs text-gray-400 mb-0.5">本周收入</p>
-                <p className="text-base font-bold text-income tabular-nums">{formatAmount(weekIncome)}</p>
+                <p className="text-[10.5px] text-slate-500 font-medium mb-1.5">本周收入</p>
+                <p className="text-xl font-bold text-income tabular-nums">{formatAmount(weekIncome)}</p>
               </div>
+              <div className="w-px" style={{ background: 'rgba(71,85,105,0.2)' }} />
               <div>
-                <p className="text-xs text-gray-400 mb-0.5">日均支出</p>
-                <p className="text-base font-bold text-expense tabular-nums">{formatAmount(Math.round(weekExpense / weekDays))}</p>
+                <p className="text-[10.5px] text-slate-500 font-medium mb-1.5">日均支出</p>
+                <p className="text-xl font-bold text-expense tabular-nums">{formatAmount(Math.round(weekExpense / weekDays))}</p>
               </div>
             </div>
           </div>
@@ -139,10 +144,10 @@ export default function Dashboard() {
       })()}
 
       {anomalies.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-4">
-          <p className="text-sm font-medium text-yellow-800">异常提醒</p>
+        <div className="bg-yellow-950/20 border border-yellow-800/40 rounded-xl p-3 mb-3">
+          <p className="text-sm font-medium text-yellow-200">异常提醒</p>
           {anomalies.map(a => (
-            <p key={a.categoryId} className="text-xs text-yellow-700 mt-1">
+            <p key={a.categoryId} className="text-xs text-yellow-300 mt-1">
               「{a.categoryName}」本月已花 {formatAmount(a.currentAmount, { minOne: true })}，较前3月均值增长 {a.deviation}%
             </p>
           ))}
@@ -150,11 +155,12 @@ export default function Dashboard() {
       )}
 
       {showBackupReminder && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 flex items-center justify-between">
-          <p className="text-sm text-blue-700">已超过7天未备份，建议立即备份数据</p>
+        <div className="bg-sky-950/30 border border-sky-800/40 rounded-xl p-3 mb-3 flex items-center justify-between">
+          <p className="text-sm text-sky-300">已超过7天未备份，建议立即备份数据</p>
           <button
             onClick={() => navigate('/settings')}
-            className="text-xs px-3 py-1 bg-blue-500 text-white rounded-lg"
+            className="text-xs px-3 py-1 rounded-lg text-white font-medium"
+            style={{ background: 'linear-gradient(135deg, #0284c7, #0ea5e9)' }}
           >
             去备份
           </button>
@@ -162,22 +168,25 @@ export default function Dashboard() {
       )}
 
       {budgetProgress && (
-        <div className="card p-4 mb-4">
+        <div className="card p-4 mb-3">
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-gray-400">月度预算</span>
-            <span className="text-ink font-medium text-xs">
+            <span className="text-xs text-slate-500">月度预算</span>
+            <span className="text-slate-200 font-medium text-xs">
               已用 {budgetProgress.percentage}%
             </span>
           </div>
-          <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(71,85,105,0.25)' }}>
             <div
               className={`h-full rounded-full transition-all ${
-                budgetProgress.percentage > 100 ? 'bg-expense' : budgetProgress.percentage > 80 ? 'bg-yellow-500' : 'bg-blue-500'
+                budgetProgress.percentage > 100 ? 'bg-red-500' : budgetProgress.percentage > 80 ? 'bg-amber-500' : ''
               }`}
-              style={{ width: `${Math.min(budgetProgress.percentage, 100)}%` }}
+              style={{
+                width: `${Math.min(budgetProgress.percentage, 100)}%`,
+                ...(budgetProgress.percentage > 80 ? {} : { background: 'linear-gradient(90deg, #0284c7, #38bdf8)' })
+              }}
             />
           </div>
-          <p className="text-xs text-gray-400 mt-1.5">
+          <p className="text-xs text-slate-500 mt-1.5">
             {budgetProgress.remaining > 0
               ? `剩余 ${formatAmount(budgetProgress.remaining)}`
               : `已超支 ${formatAmount(Math.abs(budgetProgress.remaining))}`}
@@ -186,8 +195,8 @@ export default function Dashboard() {
       )}
 
       {budgets.filter(b => b.categoryId && b.categoryId !== '__total__').length > 0 && (
-        <div className="card p-4 mb-4">
-          <h3 className="text-sm font-semibold text-ink mb-3">分类预算</h3>
+        <div className="card p-4 mb-3">
+          <h3 className="text-sm font-semibold text-slate-200 mb-3">分类预算</h3>
           {budgets.filter(b => b.categoryId && b.categoryId !== '__total__').map(b => {
             const cat = getById(b.categoryId!);
             // 包含子分类的支出汇总
@@ -211,10 +220,13 @@ export default function Dashboard() {
                     <span className="text-amber-500">{formatAmount(b.amount)}</span>
                   </span>
                 </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(71,85,105,0.25)' }}>
                   <div
-                    className={`h-full rounded-full ${pct > 100 ? 'bg-red-500' : pct > 80 ? 'bg-yellow-500' : 'bg-blue-500'}`}
-                    style={{ width: `${Math.min(pct, 100)}%` }}
+                    className={`h-full rounded-full ${pct > 100 ? 'bg-red-500' : pct > 80 ? 'bg-amber-500' : ''}`}
+                    style={{
+                      width: `${Math.min(pct, 100)}%`,
+                      ...(pct > 80 ? {} : { background: 'linear-gradient(90deg, #0284c7, #38bdf8)' })
+                    }}
                   />
                 </div>
               </div>
@@ -225,7 +237,7 @@ export default function Dashboard() {
 
       <button
         onClick={() => navigate('/add')}
-        className="w-full py-3 bg-blue-500 text-white rounded-xl font-medium text-sm active:bg-blue-600"
+        className="btn-primary"
       >
         ➕ 记一笔
       </button>
