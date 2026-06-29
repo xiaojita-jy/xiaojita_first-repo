@@ -216,7 +216,7 @@ export default function Dashboard() {
                   </span>
                   <span className="text-xs tabular-nums">
                     <span className="text-expense">{formatAmount(spent)}</span>
-                    <span className="text-gray-400 mx-0.5">|</span>
+                    <span className="text-slate-500 mx-0.5">|</span>
                     <span className="text-amber-500">{formatAmount(b.amount)}</span>
                   </span>
                 </div>

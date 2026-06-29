@@ -128,7 +128,7 @@ export default function Reports() {
               });
               if (!lastMonth || lastMonth.expense === 0) return null;
               const change = Math.round(((currentExpense - lastMonth.expense) / lastMonth.expense) * 100);
-              if (change === 0) return <p className="text-xs text-gray-400 mt-0.5">环比持平</p>;
+              if (change === 0) return <p className="text-xs text-slate-500 mt-0.5">环比持平</p>;
               const isUp = change > 0;
               return (
                 <p className={`text-xs mt-0.5 ${isUp ? 'text-red-400' : 'text-emerald-400'}`}>
@@ -149,7 +149,7 @@ export default function Reports() {
               });
               if (!lastMonth || lastMonth.income === 0) return null;
               const change = Math.round(((currentIncome - lastMonth.income) / lastMonth.income) * 100);
-              if (change === 0) return <p className="text-xs text-gray-400 mt-0.5">环比持平</p>;
+              if (change === 0) return <p className="text-xs text-slate-500 mt-0.5">环比持平</p>;
               const isUp = change > 0;
               return (
                 <p className={`text-xs mt-0.5 ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -195,7 +195,7 @@ export default function Reports() {
 
       {/* Budget history comparison */}
       <div className="mt-4">
-        <Suspense fallback={<div className="card p-4"><p className="text-center text-gray-400 py-6 text-sm">加载中...</p></div>}>
+        <Suspense fallback={<div className="card p-4"><p className="text-center text-slate-500 py-6 text-sm">加载中...</p></div>}>
           <BudgetHistory />
         </Suspense>
       </div>

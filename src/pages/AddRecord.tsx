@@ -154,7 +154,7 @@ export default function AddRecord() {
 
       <div className="space-y-5 mt-6">
         {catLoading ? (
-          <p className="text-sm text-gray-400 text-center py-4">加载分类中...</p>
+          <p className="text-sm text-slate-500 text-center py-4">加载分类中...</p>
         ) : catError ? (
           <p className="text-sm text-red-500 text-center py-4">分类加载失败：{catError}</p>
         ) : (

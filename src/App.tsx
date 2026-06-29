@@ -13,7 +13,7 @@ const Settings = lazy(() => import('./pages/Settings'));
 function Loading() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <p className="text-gray-400 text-sm">加载中...</p>
+      <p className="text-slate-500 text-sm">加载中...</p>
     </div>
   );
 }
