@@ -12,12 +12,18 @@ const tabs = [
 
 export default function Layout() {
   return (
-    <div className="min-h-screen pb-16 bg-paper">
+    <div className="min-h-screen pb-16 bg-bg-root">
       <ToastContainer />
       <main className="max-w-lg mx-auto">
         <Outlet />
       </main>
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-border z-50">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[rgba(71,85,105,0.15)]"
+        style={{
+          background: 'rgba(10, 14, 20, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+        }}
+      >
         <div className="max-w-lg mx-auto flex justify-around">
           {tabs.map(tab => (
             <NavLink
@@ -25,13 +31,13 @@ export default function Layout() {
               to={tab.to}
               end={tab.to === '/'}
               className={({ isActive }) =>
-                `flex flex-col items-center py-2 px-3 text-xs transition-colors ${
-                  isActive ? 'text-blue-600' : 'text-gray-400'
+                `flex flex-col items-center py-2 px-3 text-[10px] transition-colors ${
+                  isActive ? 'text-accent font-semibold' : 'text-slate-600 font-medium'
                 }`
               }
             >
-              <span className="text-xl">{tab.icon}</span>
-              <span className="mt-0.5">{tab.label}</span>
+              <span className="text-lg mb-0.5">{tab.icon}</span>
+              <span>{tab.label}</span>
             </NavLink>
           ))}
         </div>
