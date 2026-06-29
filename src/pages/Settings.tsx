@@ -132,29 +132,29 @@ export default function Settings() {
   };
 
   return (
-    <div className="px-4 py-8">
-      <h1 className="text-xl font-bold text-ink mb-6">我的</h1>
+    <div className="px-5 pt-7 pb-8">
+      <h1 className="text-[26px] font-bold text-text-primary tracking-tight mb-6">我的</h1>
 
       <div className="card p-4 mb-4">
         <button onClick={() => navigate('/budget')} className="w-full flex items-center justify-between py-2">
-          <span className="text-sm text-gray-800">💰 预算设置</span>
-          <span className="text-gray-400">›</span>
+          <span className="text-sm text-slate-200">💰 预算设置</span>
+          <span className="text-slate-500">›</span>
         </button>
       </div>
 
       <div className="card p-4 mb-4">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-sm font-semibold text-ink">分类管理</h2>
+          <h2 className="text-sm font-semibold text-slate-200">分类管理</h2>
           {!addForm && !editingCategory && (
             <button
               onClick={() => setAddForm({ type: 'expense' })}
-              className="text-blue-500 text-sm"
+              className="text-accent text-sm"
             >
               + 新增
             </button>
           )}
         </div>
-        {deleteError && <p className="text-red-500 text-xs mb-2">{deleteError}</p>}
+        {deleteError && <p className="text-red-400 text-xs mb-2">{deleteError}</p>}
 
         {addForm && !addForm.parentId && (
           <CategoryForm
@@ -180,12 +180,12 @@ export default function Settings() {
                     onCancel={() => setEditingCategory(null)}
                   />
                 ) : (
-                  <div className="flex items-center justify-between py-2 border-b border-gray-50">
+                  <div className="flex items-center justify-between py-2 border-b border-[rgba(71,85,105,0.15)]">
                     <button
                       onClick={() => subs.length > 0 && toggleExpand(cat.id)}
                       className="flex items-center gap-1"
                     >
-                      <span className="text-xs text-gray-400 w-4">
+                      <span className="text-xs text-slate-500 w-4">
                         {subs.length > 0 ? (expandedIds.has(cat.id) ? '▼' : '▶') : '　'}
                       </span>
                       <span>
@@ -196,8 +196,8 @@ export default function Settings() {
                       </span>
                     </button>
                     <div className="flex gap-2">
-                      <button onClick={() => setAddForm({ parentId: cat.id, type: cat.type })} className="text-xs text-green-500">+子分类</button>
-                      <button onClick={() => setEditingCategory(cat)} className="text-xs text-blue-400">编辑</button>
+                      <button onClick={() => setAddForm({ parentId: cat.id, type: cat.type })} className="text-xs text-emerald-400">+子分类</button>
+                      <button onClick={() => setEditingCategory(cat)} className="text-xs text-accent">编辑</button>
                       <button onClick={() => setDeleteTarget(cat.id)} className="text-xs text-red-400">删除</button>
                       {(() => {
                         const sibs = categories
@@ -209,13 +209,13 @@ export default function Settings() {
                             <button
                               onClick={() => moveUp(cat.id)}
                               disabled={idx <= 0}
-                              className={`text-xs ${idx <= 0 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                              className={`text-xs ${idx <= 0 ? 'text-slate-600 cursor-default' : 'text-slate-400 hover:text-ink cursor-pointer'}`}
                               title="上移"
                             >↑</button>
                             <button
                               onClick={() => moveDown(cat.id)}
                               disabled={idx >= sibs.length - 1}
-                              className={`text-xs ${idx >= sibs.length - 1 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                              className={`text-xs ${idx >= sibs.length - 1 ? 'text-slate-600 cursor-default' : 'text-slate-400 hover:text-ink cursor-pointer'}`}
                               title="下移"
                             >↓</button>
                           </>
@@ -249,15 +249,15 @@ export default function Settings() {
                       />
                     </div>
                   ) : (
-                    <div key={sub.id} className="flex items-center justify-between py-1.5 pl-6 border-b border-gray-50">
-                      <span className="text-sm text-gray-500">
+                    <div key={sub.id} className="flex items-center justify-between py-1.5 pl-6 border-b border-[rgba(71,85,105,0.15)]">
+                      <span className="text-sm text-slate-400">
                         {sub.color && (
                           <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle" style={{ backgroundColor: sub.color }} />
                         )}
                         {sub.icon} {sub.name}
                       </span>
                       <div className="flex gap-2">
-                        <button onClick={() => setEditingCategory(sub)} className="text-xs text-blue-400">编辑</button>
+                        <button onClick={() => setEditingCategory(sub)} className="text-xs text-accent">编辑</button>
                         <button onClick={() => setDeleteTarget(sub.id)} className="text-xs text-red-400">删除</button>
                         {(() => {
                           const sibs = subs.sort((a, b) => a.order - b.order);
@@ -267,13 +267,13 @@ export default function Settings() {
                               <button
                                 onClick={() => moveUp(sub.id)}
                                 disabled={idx <= 0}
-                                className={`text-xs ${idx <= 0 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                                className={`text-xs ${idx <= 0 ? 'text-slate-600 cursor-default' : 'text-slate-400 hover:text-ink cursor-pointer'}`}
                                 title="上移"
                               >↑</button>
                               <button
                                 onClick={() => moveDown(sub.id)}
                                 disabled={idx >= sibs.length - 1}
-                                className={`text-xs ${idx >= sibs.length - 1 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                                className={`text-xs ${idx >= sibs.length - 1 ? 'text-slate-600 cursor-default' : 'text-slate-400 hover:text-ink cursor-pointer'}`}
                                 title="下移"
                               >↓</button>
                             </>
@@ -290,9 +290,9 @@ export default function Settings() {
       </div>
 
       <div className="card p-4 mb-4">
-        <h2 className="text-sm font-semibold text-ink mb-3">模板管理</h2>
+        <h2 className="text-sm font-semibold text-slate-200 mb-3">模板管理</h2>
         {templates.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-2">暂无模板，记一笔时可保存为模板</p>
+          <p className="text-xs text-slate-500 text-center py-2">暂无模板，记一笔时可保存为模板</p>
         ) : (
           <div className="space-y-1">
             {[...templates].sort((a, b) => a.order - b.order).map((tpl, idx, arr) => {
@@ -318,12 +318,12 @@ export default function Settings() {
                 : (cat?.icon || '📌');
 
               return (
-                <div key={tpl.id} className="flex items-center justify-between py-2 border-b border-gray-50">
+                <div key={tpl.id} className="flex items-center justify-between py-2 border-b border-[rgba(71,85,105,0.15)]">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <span className="text-sm shrink-0">{displayIcon}</span>
                     {isEditingName ? (
                       <input
-                        className="text-sm border border-blue-300 rounded px-1.5 py-0.5 w-24 shrink-0"
+                        className="text-sm border border-accent/50 rounded px-1.5 py-0.5 w-24 shrink-0 bg-[rgba(30,41,59,0.4)]"
                         value={editNameValue}
                         onChange={e => setEditNameValue(e.target.value)}
                         onBlur={() => {
@@ -341,31 +341,31 @@ export default function Settings() {
                     ) : (
                       <span className="text-sm text-ink truncate">{tpl.name}</span>
                     )}
-                    <span className="text-xs text-gray-400 truncate">{catPath}</span>
-                    <span className={`text-xs font-medium tabular-nums shrink-0 ${tpl.type === 'expense' ? 'text-red-400' : 'text-green-500'}`}>
+                    <span className="text-xs text-slate-500 truncate">{catPath}</span>
+                    <span className={`text-xs font-medium tabular-nums shrink-0 ${tpl.type === 'expense' ? 'text-red-400' : 'text-emerald-400'}`}>
                       {tpl.type === 'expense' ? '-' : '+'}{formatAmount(tpl.amount, { minOne: true })}
                     </span>
-                    <span className={`text-xs px-1.5 py-0.5 rounded shrink-0 ${tpl.type === 'expense' ? 'bg-red-50 text-red-400' : 'bg-green-50 text-green-500'}`}>
+                    <span className={`text-xs px-1.5 py-0.5 rounded shrink-0 ${tpl.type === 'expense' ? 'bg-red-950/30 text-red-400' : 'bg-emerald-950/30 text-emerald-400'}`}>
                       {tpl.type === 'expense' ? '支出' : '收入'}
                     </span>
                   </div>
                   <div className="flex gap-1 ml-2 shrink-0">
                     <button
                       onClick={() => { setEditingTemplateName(tpl.id); setEditNameValue(tpl.name); }}
-                      className="text-xs text-blue-400"
+                      className="text-xs text-accent"
                       title="编辑名称"
                     >✏️</button>
                     <button onClick={() => setDeleteTplTarget(tpl.id)} className="text-xs text-red-400" title="删除">🗑️</button>
                     <button
                       onClick={() => moveTplUp(tpl.id)}
                       disabled={idx <= 0}
-                      className={`text-xs ${idx <= 0 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                      className={`text-xs ${idx <= 0 ? 'text-slate-600 cursor-default' : 'text-slate-400 hover:text-ink cursor-pointer'}`}
                       title="上移"
                     >↑</button>
                     <button
                       onClick={() => moveTplDown(tpl.id)}
                       disabled={idx >= arr.length - 1}
-                      className={`text-xs ${idx >= arr.length - 1 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:text-ink cursor-pointer'}`}
+                      className={`text-xs ${idx >= arr.length - 1 ? 'text-slate-600 cursor-default' : 'text-slate-400 hover:text-ink cursor-pointer'}`}
                       title="下移"
                     >↓</button>
                   </div>
@@ -377,23 +377,23 @@ export default function Settings() {
       </div>
 
       <div className="card p-4 mb-4">
-        <h2 className="text-sm font-semibold text-ink mb-3">数据管理</h2>
+        <h2 className="text-sm font-semibold text-slate-200 mb-3">数据管理</h2>
         {importMsg && (
-          <p className={`text-xs mb-2 ${importMsg.includes('成功') ? 'text-green-500' : 'text-red-500'}`}>{importMsg}</p>
+          <p className={`text-xs mb-2 ${importMsg.includes('成功') ? 'text-emerald-400' : 'text-red-400'}`}>{importMsg}</p>
         )}
-        {lastBackup && <p className="text-xs text-gray-400 mb-3">上次备份：{formatBackupTime(lastBackup)}</p>}
+        {lastBackup && <p className="text-xs text-slate-500 mb-3">上次备份：{formatBackupTime(lastBackup)}</p>}
         <div className="flex gap-3">
-          <button onClick={handleExport} className="flex-1 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-medium">📤 导出备份</button>
-          <button onClick={() => setShowImportConfirm(true)} className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium">📥 恢复备份</button>
+          <button onClick={handleExport} style={{ background: 'linear-gradient(135deg, #0284c7, #0ea5e9)' }} className="flex-1 py-2.5 text-white rounded-xl text-sm font-medium">📤 导出备份</button>
+          <button onClick={() => setShowImportConfirm(true)} className="flex-1 py-2.5 bg-[rgba(71,85,105,0.2)] text-slate-300 rounded-xl text-sm font-medium">📥 恢复备份</button>
         </div>
         <div className="mt-2">
-          <button onClick={handleExportCSV} className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium">📊 导出 CSV</button>
+          <button onClick={handleExportCSV} className="w-full py-2.5 bg-transparent border border-[rgba(71,85,105,0.35)] text-slate-300 rounded-xl text-sm font-medium">📊 导出 CSV</button>
         </div>
       </div>
 
       <div className="card p-4">
-        <h2 className="text-sm font-semibold text-ink mb-2">关于</h2>
-        <p className="text-xs text-gray-400">记账 v1.0.0 — 本地存储，你的数据只在你手里。</p>
+        <h2 className="text-sm font-semibold text-slate-200 mb-2">关于</h2>
+        <p className="text-xs text-slate-500">记账 v1.0.0 — 本地存储，你的数据只在你手里。</p>
       </div>
 
       <ConfirmDialog

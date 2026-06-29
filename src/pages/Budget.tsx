@@ -38,41 +38,41 @@ export default function Budget() {
     await saveBudget(categoryId, amount);
   };
 
-  if (loading) return <div className="px-4 py-8 text-center text-gray-400">加载中...</div>;
+  if (loading) return <div className="px-5 pt-7 pb-8 text-center text-slate-500">加载中...</div>;
 
   return (
-    <div className="px-4 py-8">
-      <h1 className="text-xl font-bold text-ink mb-6">预算设置</h1>
+    <div className="px-5 pt-7 pb-8">
+      <h1 className="text-[26px] font-bold text-text-primary tracking-tight mb-6">预算设置</h1>
 
       <div className="card p-4 mb-4">
-        <h2 className="text-sm font-semibold text-ink mb-3">月度总预算</h2>
+        <h2 className="text-sm font-semibold text-slate-200 mb-3">月度总预算</h2>
         <div className="flex gap-2">
           <input
             type="text" inputMode="decimal"
             value={totalBudget}
             onChange={e => setTotalBudget(e.target.value)}
             placeholder="例如：10000"
-            className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm text-ink focus:outline-none focus:border-blue-400 bg-white"
+            className="input-dark flex-1"
           />
-          <button onClick={handleSaveTotal} className="px-4 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-medium">保存</button>
+          <button onClick={handleSaveTotal} style={{ background: 'linear-gradient(135deg, #0284c7, #0ea5e9)' }} className="px-4 py-2.5 text-white rounded-xl text-sm font-medium">保存</button>
         </div>
       </div>
 
       <div className="card p-4">
-        <h2 className="text-sm font-semibold text-ink mb-3">分类预算</h2>
+        <h2 className="text-sm font-semibold text-slate-200 mb-3">分类预算</h2>
         <div className="space-y-3">
           {expenseCategories.map(cat => (
             <div key={cat.id} className="flex items-center gap-2">
               <span className="text-lg w-8 text-center">{cat.icon}</span>
-              <span className="text-sm text-ink w-16">{cat.name}</span>
+              <span className="text-sm text-slate-200 w-16">{cat.name}</span>
               <input
                 type="text" inputMode="decimal"
                 value={categoryBudgets[cat.id] || ''}
                 onChange={e => setCategoryBudgets(prev => ({ ...prev, [cat.id]: e.target.value }))}
                 placeholder="限额"
-                className="flex-1 px-3 py-2 rounded-lg border border-border text-sm text-ink focus:outline-none focus:border-blue-400 bg-white"
+                className="input-dark flex-1"
               />
-              <button onClick={() => handleSaveCategory(cat.id)} className="px-3 py-2 bg-blue-500 text-white rounded-lg text-xs font-medium">保存</button>
+              <button onClick={() => handleSaveCategory(cat.id)} style={{ background: 'linear-gradient(135deg, #0284c7, #0ea5e9)' }} className="px-3 py-2 text-white rounded-lg text-xs font-medium">保存</button>
             </div>
           ))}
         </div>
